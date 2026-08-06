@@ -36,7 +36,7 @@ flowchart LR
 
 Blocked until explicit provider/model snapshot approval:
 
-1. select 20 items shared across two approved models;
+1. select 20 items shared across `gpt-5.4` and `gemini-3.5-flash`;
 2. run 4--5 disclosure variants at the pilot settings;
 3. manually classify every output as pin-able premise, task restatement,
    generic methodology, formatting/tooling, malformed, or refusal;

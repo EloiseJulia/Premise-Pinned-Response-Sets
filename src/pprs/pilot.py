@@ -38,7 +38,7 @@ PILOT_TASK_COUNTS = {
     TaskId.CHAOSNLI_MNLI: 7,
     TaskId.SUMMEVAL_RELEVANCE: 6,
 }
-PILOT_MODELS = ("gpt-5.4", "claude-haiku-4.5")
+PILOT_MODELS = ("gpt-5.4", "gemini-3.5-flash")
 
 
 class StrictModel(BaseModel):
