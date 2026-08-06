@@ -1,0 +1,34 @@
+# Editor and Office temporary files
+.DS_Store
+Thumbs.db
+~$*.docx
+*.tmp
+
+# Local environment and credentials
+.venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python and test outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Regenerable experiment artifacts and provider data
+artifacts/
+data/cache/
+data/raw/
+reports/
+*.parquet
+*.sqlite
+*.db
+
+# Git worktrees created for isolated agent slices
+.worktrees/
