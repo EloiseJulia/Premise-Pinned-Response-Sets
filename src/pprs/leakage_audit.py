@@ -16,6 +16,7 @@ from pprs.prompts import TaskFraming, render_disclosure_prompt
 
 AUDITOR_MODEL = "mai-code-1-flash-picker"
 AUDIT_SAMPLE_SIZE = 30
+AUDITOR_MAX_COMPLETION_TOKENS = 2048
 
 
 class StrictModel(BaseModel):
@@ -105,7 +106,7 @@ def audit_key(
             "model": model,
             "seed": seed,
             "top_p": 1.0,
-            "max_completion_tokens": 512,
+            "max_completion_tokens": AUDITOR_MAX_COMPLETION_TOKENS,
             "response_format": "json_object",
         },
         ensure_ascii=True,
@@ -136,7 +137,7 @@ def _call_auditor(
             "messages": [{"role": "user", "content": prompt}],
             "seed": seed,
             "top_p": 1.0,
-            "max_completion_tokens": 512,
+            "max_completion_tokens": AUDITOR_MAX_COMPLETION_TOKENS,
             "response_format": {"type": "json_object"},
         }
     ).encode("utf-8")

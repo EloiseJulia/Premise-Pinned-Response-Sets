@@ -1,0 +1,122 @@
+{
+  "config_id": "confirmatory-v1",
+  "base_seed": 42,
+  "seed_policy": "sha256(namespace + canonical experiment coordinates + base_seed) modulo 2^31",
+  "tasks": {
+    "chaosnli_snli": {
+      "sample_manifest_id": "60336d87e0fa5f6db7c0e07257040479b71844b497b85c4a8ac78d26943aa3f1",
+      "sample_size": 150
+    },
+    "chaosnli_mnli": {
+      "sample_manifest_id": "76fede1e3cd4cb1bac8477ac946a26004ce40dd45ec92976f90abd1f65d13d22",
+      "sample_size": 150
+    },
+    "summeval_relevance": {
+      "sample_manifest_id": "858c38a5a5fc912dd0ef2179dc5c8763c4d05268708d5dc9adb8660342f8bc81",
+      "sample_size": 150,
+      "analysis_polarities": [
+        "upstream_behavior",
+        "semantic_aligned"
+      ]
+    }
+  },
+  "models": [
+    {
+      "model_snapshot": "gpt-5.4",
+      "vendor": "OpenAI",
+      "capability_tier": "strong_reasoning"
+    },
+    {
+      "model_snapshot": "gpt-4o-mini-2024-07-18",
+      "vendor": "OpenAI",
+      "capability_tier": "weak"
+    },
+    {
+      "model_snapshot": "gemini-3.1-pro-preview",
+      "vendor": "Google",
+      "capability_tier": "strong"
+    },
+    {
+      "model_snapshot": "gemini-3.5-flash",
+      "vendor": "Google",
+      "capability_tier": "weak"
+    }
+  ],
+  "provider": {
+    "adapter": "litellm_openai_compatible",
+    "service": "local_ghc_api",
+    "metadata_retrieved_at": "2026-08-07T01:09:00+08:00"
+  },
+  "prompt": {
+    "premise_disclosure_template_id": "premise-disclosure-inventory-v2",
+    "max_premises": 4,
+    "candidate_values_per_premise_min": 2,
+    "candidate_values_per_premise_max": 3,
+    "pinning": "one_dimension_one_value_per_call",
+    "placebo": "one_length_matched_irrelevant_pin_per_real_pin"
+  },
+  "paths": {
+    "forced_choice": {
+      "repetitions": 20
+    },
+    "multi_label": {
+      "repetitions": 20
+    },
+    "premise_disclosure": {
+      "repetitions": 3
+    },
+    "premise_pinned": {
+      "repetitions_per_premise_value": 1
+    }
+  },
+  "temperatures": [
+    0.0,
+    0.7
+  ],
+  "top_p": 1.0,
+  "response_format": "strict_json",
+  "option_permutation": {
+    "enabled": true,
+    "seed_policy": "coordinate_hash_namespace_option_permutation"
+  },
+  "thresholds": {
+    "pi": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25
+    ],
+    "tau": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "danger_h_seed_max_bits": 0.5,
+    "danger_h_ctx_min_exclusive_bits": 0.0
+  },
+  "ablations": {
+    "full_grid_items_per_task": 20,
+    "placebo": true,
+    "leakage_audit_items_per_task": 30,
+    "leakage_auditor_model": "mai-code-1-flash-picker"
+  },
+  "smoke": {
+    "items": 10,
+    "models": [
+      "gpt-5.4",
+      "gemini-3.5-flash"
+    ],
+    "minimum_parse_success": 0.95,
+    "rerun_cache_hit_rate": 1.0,
+    "manual_records": 20
+  }
+}

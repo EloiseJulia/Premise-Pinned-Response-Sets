@@ -2,6 +2,7 @@ import json
 
 from pprs.data.schema import DatasetRecord, TaskId
 from pprs.leakage_audit import (
+    AUDITOR_MAX_COMPLETION_TOKENS,
     audit_key,
     build_auditor_prompt,
     parse_audit_payload,
@@ -81,3 +82,7 @@ def test_audit_key_changes_with_endpoint() -> None:
         1,
         "http://127.0.0.1:8787/v1",
     )
+
+
+def test_auditor_completion_budget_supports_long_prompts() -> None:
+    assert AUDITOR_MAX_COMPLETION_TOKENS >= 2048
