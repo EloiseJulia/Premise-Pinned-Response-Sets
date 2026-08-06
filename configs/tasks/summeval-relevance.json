@@ -7,7 +7,7 @@
   "source_object_id": "5f3c386bf230cfa0d53fec293cfb56bf7ac76637",
   "source_split": "all",
   "sample_size": 150,
-  "sampling_seed": null,
+  "sampling_seed": 42,
   "input_fields": [
     "article",
     "summary"

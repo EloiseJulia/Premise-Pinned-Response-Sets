@@ -21,7 +21,7 @@ def test_locked_nli_configs_validate(config_path: Path) -> None:
     assert config.ratings_per_item == 100
 
 
-def test_summeval_config_has_both_polarities_and_no_seed() -> None:
+def test_summeval_config_has_both_polarities_and_seed_42() -> None:
     config = TaskConfig.model_validate(
         json.loads(
             Path("configs/tasks/summeval-relevance.json").read_text()
@@ -31,7 +31,7 @@ def test_summeval_config_has_both_polarities_and_no_seed() -> None:
         "upstream_behavior",
         "semantic_aligned",
     }
-    assert config.sampling_seed is None
+    assert config.sampling_seed == 42
 
 
 def test_label_counts_must_total_100(dataset_record: DatasetRecord) -> None:

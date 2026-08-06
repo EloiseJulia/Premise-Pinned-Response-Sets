@@ -216,10 +216,8 @@ class TaskConfig(StrictModel):
                 )
             if self.sample_size != 150 or self.ratings_per_item != 8:
                 raise ValueError("SummEval sample size and rating count are locked")
-            if self.sampling_seed is not None:
-                raise ValueError(
-                    "SummEval sampling seed remains owner-gated"
-                )
+            if self.sampling_seed != 42:
+                raise ValueError("SummEval sampling seed must be 42")
             if self.valid_response_sets != ("A", "B", "AB"):
                 raise ValueError("SummEval response-set token order is locked")
             if self.analysis_conventions != {
@@ -402,5 +400,49 @@ class DatasetRecord(StrictModel):
                     )
             if self.sampling_seed != 42:
                 raise ValueError("ChaosNLI sampling seed must be 42")
+
+        if self.task is TaskId.SUMMEVAL_RELEVANCE:
+            if (
+                self.source_dataset != "SummEval"
+                or self.source_revision
+                != "37b8d7863430ec3433d6a73da08408b064643b8b"
+                or self.source_object_id
+                != "5f3c386bf230cfa0d53fec293cfb56bf7ac76637"
+                or self.source_split != "all"
+            ):
+                raise ValueError("SummEval record provenance is locked")
+            if self.sampling_seed != 42:
+                raise ValueError("SummEval sampling seed must be 42")
+            if set(self.inputs) != {"article", "summary"} or any(
+                not value.strip() for value in self.inputs.values()
+            ):
+                raise ValueError(
+                    "SummEval records require nonempty article and summary"
+                )
+            expected_keys = {"relevance_0", "relevance_1"}
+            if set(self.human_label_counts) != expected_keys:
+                raise ValueError(
+                    "SummEval records retain relevance_0 and relevance_1"
+                )
+            if set(self.human_label_distribution) != expected_keys:
+                raise ValueError(
+                    "SummEval distributions retain source column names"
+                )
+            if self.ratings_per_item != 8:
+                raise ValueError("SummEval records must contain 8 ratings")
+            if any(count < 0 for count in self.human_label_counts.values()):
+                raise ValueError("human label counts cannot be negative")
+            if sum(self.human_label_counts.values()) != 8:
+                raise ValueError("SummEval label counts must sum to 8")
+            for key, count in self.human_label_counts.items():
+                if not isclose(
+                    self.human_label_distribution[key],
+                    count / 8,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                ):
+                    raise ValueError(
+                        "SummEval distribution must be derived from counts"
+                    )
 
         return self
