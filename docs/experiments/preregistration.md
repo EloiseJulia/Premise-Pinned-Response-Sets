@@ -1,7 +1,7 @@
 # PPRS Confirmatory Preregistration
 
 **Config:** `configs/runs/confirmatory-v1.json`
-**Status:** Amendment 1 ready for freeze as `pprs-prereg-v2`.
+**Status:** Amendment 2 ready for freeze as `pprs-prereg-v3`.
 
 ## Research Questions
 
@@ -219,6 +219,20 @@ Amendment 1 changes only generation budgets and the JSON-format suffix:
 All datasets, models, temperatures, repetitions, estimators, thresholds,
 subsets, hypotheses, and reporting rules remain unchanged. The v1 smoke cache
 is retained under `artifacts/wp6-smoke/`.
+
+## Amendment 2: Deterministic seed-collision resolution
+
+The v2 smoke passed. The v2 full run stopped before its first provider call
+because two distinct full-grid coordinates mapped to the same 31-bit seed.
+
+The seed policy now preserves the original hash-derived seed when unique. On a
+collision only, it appends an integer collision nonce to the canonical
+coordinates and rehashes until unused. This is deterministic and does not alter
+any v2 smoke seed because the smoke plan had no collision.
+
+The accepted v2 smoke remains valid and is bound to Git SHA
+`280a6f46e4d3a66ca38e2747abfa7524642a5f4c`; it is not rerun. No v2 full-study
+provider call occurred.
 
 ## Smoke Gate
 

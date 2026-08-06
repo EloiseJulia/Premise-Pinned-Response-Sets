@@ -1,8 +1,8 @@
 {
   "config_id": "confirmatory-v1-amendment-1",
-  "prereg_tag": "pprs-prereg-v2",
+  "prereg_tag": "pprs-prereg-v3",
   "base_seed": 42,
-  "seed_policy": "sha256(namespace + canonical experiment coordinates + base_seed) modulo 2^31",
+  "seed_policy": "sha256(namespace + canonical experiment coordinates + base_seed) modulo 2^31; on collision append deterministic integer nonce and rehash",
   "tasks": {
     "chaosnli_snli": {
       "sample_manifest_id": "60336d87e0fa5f6db7c0e07257040479b71844b497b85c4a8ac78d26943aa3f1",
@@ -165,7 +165,9 @@
     ],
     "minimum_parse_success": 0.95,
     "rerun_cache_hit_rate": 1.0,
-    "human_manual_records": 20
+    "human_manual_records": 20,
+    "accepted_smoke_tag": "pprs-prereg-v2",
+    "accepted_smoke_git_sha": "280a6f46e4d3a66ca38e2747abfa7524642a5f4c"
   },
   "model_drift_gate": {
     "record_system_fingerprint": true,

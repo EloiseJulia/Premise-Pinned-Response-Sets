@@ -31,18 +31,18 @@ def main() -> None:
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path("artifacts/wp7-full-v2/cache"),
+        default=Path("artifacts/wp7-full-v3/cache"),
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("artifacts/wp7-full-v2/summary.json"),
+        default=Path("artifacts/wp7-full-v3/summary.json"),
     )
     parser.add_argument("--concurrency", type=int, default=16)
     args = parser.parse_args()
     git_sha = validate_freeze(
-        freeze_path=Path("configs/runs/confirmatory-v2.freeze.json"),
-        expected_tag="pprs-prereg-v2",
+        freeze_path=Path("configs/runs/confirmatory-v3.freeze.json"),
+        expected_tag="pprs-prereg-v3",
     )
     validate_smoke_gate(
         summary_path=Path("artifacts/wp6-smoke-v2/summary.json"),
@@ -50,10 +50,11 @@ def main() -> None:
         approval_path=Path(
             "artifacts/wp6-smoke-v2/review-approval.json"
         ),
-        expected_git_sha=git_sha,
+        expected_git_sha="280a6f46e4d3a66ca38e2747abfa7524642a5f4c",
         run_manifest_path=Path(
             "artifacts/wp6-smoke-v2/run-manifest.json"
         ),
+        expected_prereg_tag="pprs-prereg-v2",
     )
     sample_paths = {
         TaskId.CHAOSNLI_SNLI: (
@@ -79,7 +80,7 @@ def main() -> None:
             api_base=args.api_base,
             expected_models_roster_hash=ROSTER_HASH,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v2",
+            prereg_tag="pprs-prereg-v3",
             subset_id="confirmatory-v1",
             records=records,
             models=(
@@ -90,7 +91,7 @@ def main() -> None:
             ),
             temperatures=(0.0, 0.7),
             cache_dir=args.cache_dir,
-            run_tag="wp7-full-v2",
+            run_tag="wp7-full-v3",
             concurrency=args.concurrency,
         )
     )
@@ -108,11 +109,11 @@ def main() -> None:
             api_base=args.api_base,
             expected_models_roster_hash=ROSTER_HASH,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v2",
+            prereg_tag="pprs-prereg-v3",
             disclosure_results=disclosures,
             records=grid_records,
             cache_dir=args.cache_dir,
-            run_tag="wp7-full-grid-v2",
+            run_tag="wp7-full-grid-v3",
             expected_fingerprints=primary.system_fingerprints,
             concurrency=args.concurrency,
         )
@@ -138,7 +139,7 @@ def main() -> None:
         ),
         run_tag=primary.run_tag,
         git_sha=git_sha,
-        prereg_tag="pprs-prereg-v2",
+        prereg_tag="pprs-prereg-v3",
         output_files={
             "summary": args.output,
             "raw_inventory": raw_inventory_path,

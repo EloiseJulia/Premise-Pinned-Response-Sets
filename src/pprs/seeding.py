@@ -46,16 +46,21 @@ class SeedRegistry:
             separators=(",", ":"),
             sort_keys=True,
         )
-        seed = coordinate_seed(
-            namespace,
-            coordinates,
-            base_seed=self.base_seed,
-        )
-        key = (namespace, seed)
-        existing = self._coordinates_by_seed.get(key)
-        if existing is not None and existing != canonical:
-            raise ValueError(
-                f"seed collision in namespace {namespace}: {seed}"
+        nonce = 0
+        while True:
+            seeded_coordinates = (
+                coordinates
+                if nonce == 0
+                else {**coordinates, "__collision_nonce": nonce}
             )
-        self._coordinates_by_seed[key] = canonical
-        return seed
+            seed = coordinate_seed(
+                namespace,
+                seeded_coordinates,
+                base_seed=self.base_seed,
+            )
+            key = (namespace, seed)
+            existing = self._coordinates_by_seed.get(key)
+            if existing is None or existing == canonical:
+                self._coordinates_by_seed[key] = canonical
+                return seed
+            nonce += 1

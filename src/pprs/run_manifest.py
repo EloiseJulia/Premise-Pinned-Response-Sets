@@ -177,7 +177,7 @@ def validate_raw_run_manifest(
     expected_git_sha: str,
     trusted_manifest_sha256: str | None = None,
     trusted_manifest_id: str | None = None,
-    expected_prereg_tag: str = "pprs-prereg-v2",
+    expected_prereg_tag: str = "pprs-prereg-v3",
 ) -> RunManifest:
     if (
         trusted_manifest_sha256 is not None

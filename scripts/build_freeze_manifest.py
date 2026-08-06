@@ -74,11 +74,11 @@ def expanded_tracked_inputs() -> tuple[str, ...]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tag", default="pprs-prereg-v2")
+    parser.add_argument("--tag", default="pprs-prereg-v3")
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("configs/runs/confirmatory-v2.freeze.json"),
+        default=Path("configs/runs/confirmatory-v3.freeze.json"),
     )
     args = parser.parse_args()
     tracked = {
@@ -86,7 +86,7 @@ def main() -> None:
     }
     artifacts = {path: _sha256(Path(path)) for path in ARTIFACT_INPUTS}
     payload = {
-        "freeze_manifest_id": "confirmatory-v2-freeze",
+        "freeze_manifest_id": "confirmatory-v3-freeze",
         "prereg_tag": args.tag,
         "tracked_file_sha256": tracked,
         "artifact_sha256": artifacts,

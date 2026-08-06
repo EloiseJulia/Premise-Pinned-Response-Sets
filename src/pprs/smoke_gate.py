@@ -30,6 +30,7 @@ def validate_smoke_gate(
     approval_path: Path,
     expected_git_sha: str,
     run_manifest_path: Path,
+    expected_prereg_tag: str = "pprs-prereg-v2",
 ) -> None:
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     if summary["parse_success"] < 0.95:
@@ -66,6 +67,7 @@ def validate_smoke_gate(
     manifest = validate_raw_run_manifest(
         run_manifest_path,
         expected_git_sha=expected_git_sha,
+        expected_prereg_tag=expected_prereg_tag,
     )
     if approval.raw_manifest_sha256 != sha256_file(run_manifest_path):
         raise ValueError("smoke approval references a different run manifest")

@@ -27,19 +27,19 @@ def main() -> None:
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path("artifacts/wp7-full-v2/cache"),
+        default=Path("artifacts/wp7-full-v3/cache"),
     )
     parser.add_argument("--trusted-raw-manifest-sha256", required=True)
     parser.add_argument("--trusted-raw-manifest-id", required=True)
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("artifacts/wp7-full-v2/analysis.json"),
+        default=Path("artifacts/wp7-full-v3/analysis.json"),
     )
     args = parser.parse_args()
     freeze_sha = validate_freeze(
-        freeze_path=Path("configs/runs/confirmatory-v2.freeze.json"),
-        expected_tag="pprs-prereg-v2",
+        freeze_path=Path("configs/runs/confirmatory-v3.freeze.json"),
+        expected_tag="pprs-prereg-v3",
     )
     raw_manifest_path = args.cache_dir.parent / "run-manifest.json"
     raw_manifest = validate_raw_run_manifest(
@@ -47,7 +47,7 @@ def main() -> None:
         expected_git_sha=freeze_sha,
         trusted_manifest_sha256=args.trusted_raw_manifest_sha256,
         trusted_manifest_id=args.trusted_raw_manifest_id,
-        expected_prereg_tag="pprs-prereg-v2",
+        expected_prereg_tag="pprs-prereg-v3",
     )
     inventory_path = Path(
         raw_manifest.output_locations["raw_inventory"]

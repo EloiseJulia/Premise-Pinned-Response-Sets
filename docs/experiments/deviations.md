@@ -69,3 +69,16 @@ Record a deviation before changing any locked proposal value. Each entry must in
 - **Approval:** Owner's GO authorized repair and rerun after smoke failures.
 - **Implementation:** preregistration amendment tag `pprs-prereg-v2`; v1 tag and
   raw failures remain immutable.
+
+## 2026-08-07: Seed collision resolution amendment
+
+- **Affected lock:** Deterministic call and option-permutation seed derivation.
+- **Observed failure:** The v2 full plan found a 31-bit SHA-derived seed
+  collision before any provider call and stopped.
+- **Decision:** Preserve the original seed for all non-colliding coordinates;
+  on collision, append a deterministic integer nonce and rehash until unique.
+- **Expected impact:** Only colliding full-run coordinates change seed. The
+  passed v2 smoke had no collision and remains valid.
+- **Approval:** Covered by the owner's overnight GO to repair gates and proceed.
+- **Implementation:** `pprs-prereg-v3`; accepted smoke remains bound to v2 Git
+  SHA `280a6f46e4d3a66ca38e2747abfa7524642a5f4c`.
