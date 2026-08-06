@@ -1,6 +1,6 @@
 # WP4 Prompt Pilot Review
 
-**Date:** 2026-08-07  
+**Date:** 2026-08-07
 **Status:** Positive exploratory signal; owner line review deferred under the
 recorded deviation.
 
@@ -78,6 +78,9 @@ Rationale:
 3. 38/39 parsed focused outputs contain a usable premise;
 4. no static prompt option-label leakage was detected offline;
 5. every raw response remains available for owner review.
+
+The required 30-item/task out-of-panel leakage audit subsequently passed 90/90;
+see `docs/experiments/wp4-leakage-audit.md`.
 
 ## Caveats
 

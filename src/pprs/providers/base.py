@@ -51,6 +51,7 @@ class ProviderRequest(StrictModel):
 class ProviderResponse(StrictModel):
     raw_text: str
     http_status: int | None = None
+    system_fingerprint: str | None = None
     prompt_tokens: int | None = Field(default=None, ge=0)
     completion_tokens: int | None = Field(default=None, ge=0)
     retry_count: int = Field(default=0, ge=0)

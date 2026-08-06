@@ -17,6 +17,7 @@ from pprs.prompts import TaskFraming, render_disclosure_prompt
 AUDITOR_MODEL = "mai-code-1-flash-picker"
 AUDIT_SAMPLE_SIZE = 30
 AUDITOR_MAX_COMPLETION_TOKENS = 2048
+AUDITOR_MAX_ATTEMPTS = 5
 
 
 class StrictModel(BaseModel):
@@ -27,6 +28,8 @@ class LeakageAuditPayload(StrictModel):
     leakage: bool
     categories: tuple[str, ...]
     rationale: str = Field(min_length=1)
+    static_evidence: str = Field(min_length=1)
+    source_evidence: str = Field(min_length=1)
 
 
 class LeakageAuditRecord(StrictModel):
@@ -36,6 +39,7 @@ class LeakageAuditRecord(StrictModel):
     disclosure_template_id: str
     auditor_model: str
     seed: int
+    attempts: int = Field(ge=1)
     raw_text: str
     status: str
     parsed: LeakageAuditPayload | None
@@ -65,9 +69,6 @@ def build_auditor_prompt(
         disclosure_template_id,
     )
     static_prompt, source_item = rendered.text.split("\n\nItem:\n", maxsplit=1)
-    forbidden = ", ".join(
-        (*framing.forbidden_labels, *framing.forbidden_option_markers)
-    )
     return f"""
 You are auditing a scoring-premise disclosure prompt for answer leakage.
 
@@ -82,14 +83,17 @@ prompt for words that occur only here):
 {source_item}
 --- end source item ---
 
-Task option labels/markers to watch for: {forbidden}
-
 Set leakage=true only if the STATIC PROMPT itself introduces an option label,
 option marker, gold answer, directional answer hint, or a task-specific answer
 axis beyond the source item. Generic rubric language is not leakage.
 
+Your rationale must be item-specific. Quote one short exact phrase from the
+STATIC PROMPT in static_evidence. Quote one short exact phrase from the SOURCE
+ITEM in source_evidence, or use "no label-like source phrase" only when none is
+present. Do not return a generic checklist.
+
 Return only JSON:
-{{"leakage":false,"categories":[],"rationale":"short explanation"}}
+{{"leakage":false,"categories":[],"rationale":"item-specific explanation","static_evidence":"exact static phrase","source_evidence":"exact source phrase or no label-like source phrase"}}
 """.strip()
 
 
@@ -107,6 +111,7 @@ def audit_key(
             "seed": seed,
             "top_p": 1.0,
             "max_completion_tokens": AUDITOR_MAX_COMPLETION_TOKENS,
+            "max_attempts": AUDITOR_MAX_ATTEMPTS,
             "response_format": "json_object",
         },
         ensure_ascii=True,
@@ -122,6 +127,25 @@ def parse_audit_payload(raw_text: str) -> LeakageAuditPayload:
     except json.JSONDecodeError as exc:
         raise ValueError("auditor returned malformed JSON") from exc
     return LeakageAuditPayload.model_validate(payload)
+
+
+def validate_audit_evidence(
+    payload: LeakageAuditPayload,
+    *,
+    static_prompt: str,
+    source_item: str,
+) -> None:
+    static_normalized = " ".join(static_prompt.split())
+    source_normalized = " ".join(source_item.split())
+    static_evidence = " ".join(payload.static_evidence.split())
+    source_evidence = " ".join(payload.source_evidence.split())
+    if static_evidence not in static_normalized:
+        raise ValueError("static evidence is not quoted from static prompt")
+    if (
+        source_evidence != "no label-like source phrase"
+        and source_evidence not in source_normalized
+    ):
+        raise ValueError("source evidence is not quoted from source item")
 
 
 def _call_auditor(
@@ -177,6 +201,15 @@ async def audit_record(
         disclosure_template_id,
     )
     key = audit_key(prompt, model, seed, api_base)
+    rendered = render_disclosure_prompt(
+        framing,
+        record.inputs,
+        disclosure_template_id,
+    )
+    static_prompt, source_item = rendered.text.split(
+        "\n\nItem:\n",
+        maxsplit=1,
+    )
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_path = cache_dir / f"{key}.json"
     lock = FileLock(
@@ -191,15 +224,30 @@ async def audit_record(
                 cache_path.read_text(encoding="utf-8")
             )
         raw_text = ""
-        try:
-            raw_text = await asyncio.to_thread(
-                _call_auditor,
-                api_base,
-                prompt,
-                model=model,
-                seed=seed,
-            )
-            parsed = parse_audit_payload(raw_text)
+        parsed = None
+        error: Exception | None = None
+        attempts = 0
+        for attempt in range(AUDITOR_MAX_ATTEMPTS):
+            attempts = attempt + 1
+            try:
+                raw_text = await asyncio.to_thread(
+                    _call_auditor,
+                    api_base,
+                    prompt,
+                    model=model,
+                    seed=seed + attempt * 100_000,
+                )
+                parsed = parse_audit_payload(raw_text)
+                validate_audit_evidence(
+                    parsed,
+                    static_prompt=static_prompt,
+                    source_item=source_item,
+                )
+                error = None
+                break
+            except Exception as exc:
+                error = exc
+        if parsed is not None and error is None:
             result = LeakageAuditRecord(
                 audit_key=key,
                 task=record.task,
@@ -207,12 +255,13 @@ async def audit_record(
                 disclosure_template_id=disclosure_template_id,
                 auditor_model=model,
                 seed=seed,
+                attempts=attempts,
                 raw_text=raw_text,
                 status="ok",
                 parsed=parsed,
                 error=None,
             )
-        except Exception as exc:
+        else:
             result = LeakageAuditRecord(
                 audit_key=key,
                 task=record.task,
@@ -220,10 +269,11 @@ async def audit_record(
                 disclosure_template_id=disclosure_template_id,
                 auditor_model=model,
                 seed=seed,
+                attempts=attempts,
                 raw_text=raw_text,
                 status="error",
                 parsed=None,
-                error=str(exc),
+                error=str(error),
             )
         temporary = cache_dir / f".{key}.{uuid4().hex}.tmp"
         temporary.write_text(

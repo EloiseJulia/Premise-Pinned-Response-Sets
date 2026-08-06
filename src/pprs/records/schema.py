@@ -52,6 +52,12 @@ class ParsedPremise(StrictModel):
         return self
 
 
+class PinAssignment(StrictModel):
+    premise_id: str = Field(min_length=1)
+    premise_type: PremiseType
+    premise_value: str = Field(min_length=1)
+
+
 class RawResult(StrictModel):
     cache_key: str = Field(pattern=r"^[0-9a-f]{64}$")
     run_tag: str = Field(min_length=1)
@@ -68,6 +74,7 @@ class RawResult(StrictModel):
     premise_type: PremiseType | None
     premise_value: str | None
     premise_round: int | None = Field(default=None, ge=0)
+    pinning_assignments: tuple[PinAssignment, ...] | None
 
     model_snapshot: str = Field(min_length=1)
     provider: str = Field(min_length=1)
@@ -86,6 +93,7 @@ class RawResult(StrictModel):
     parse_status: ParseStatus
     provider_error: str | None
     http_status: int | None
+    system_fingerprint: str | None
     retry_count: int = Field(ge=0)
 
     prompt_tokens: int | None = Field(default=None, ge=0)
@@ -95,13 +103,18 @@ class RawResult(StrictModel):
 
     @model_validator(mode="after")
     def validate_failure_nullability(self) -> RawResult:
-        if self.path is not ElicitationPath.PREMISE_PINNED and any(
+        pinning_paths = {
+            ElicitationPath.PREMISE_PINNED,
+            ElicitationPath.PLACEBO,
+        }
+        if self.path not in pinning_paths and any(
             value is not None
             for value in (
                 self.premise_id,
                 self.premise_type,
                 self.premise_value,
                 self.premise_round,
+                self.pinning_assignments,
             )
         ):
             raise ValueError(
@@ -120,10 +133,7 @@ class RawResult(StrictModel):
                 )
             return self
 
-        if self.path in {
-            ElicitationPath.FORCED_CHOICE,
-            ElicitationPath.PLACEBO,
-        }:
+        if self.path is ElicitationPath.FORCED_CHOICE:
             if self.parsed_choice_hard is None:
                 raise ValueError("ok forced-choice records need a hard choice")
             if (
@@ -143,22 +153,47 @@ class RawResult(StrictModel):
                 raise ValueError(
                     "ok multi-label records cannot carry other parsed payloads"
                 )
-        elif self.path is ElicitationPath.PREMISE_PINNED:
+        elif self.path in pinning_paths:
             payloads = (
                 self.parsed_choice_hard is not None,
                 bool(self.parsed_premises),
             )
+            if (
+                self.path is ElicitationPath.PLACEBO
+                and self.parsed_premises is not None
+            ):
+                raise ValueError("placebo records cannot disclose premises")
             if sum(payloads) != 1 or self.parsed_choice_set is not None:
                 raise ValueError(
                     "ok premise-pinned records need exactly one stage payload"
                 )
             if self.parsed_choice_hard is not None:
+                if self.premise_id == "__full_grid__":
+                    if (
+                        self.premise_type is not None
+                        or self.premise_value is None
+                        or self.premise_round is None
+                        or not self.pinning_assignments
+                        or len(self.pinning_assignments) < 1
+                    ):
+                        raise ValueError(
+                            "full-grid scoring needs assignments and round"
+                        )
+                else:
+                    if self.pinning_assignments is not None:
+                        raise ValueError(
+                            "single-pin scoring cannot carry grid assignments"
+                        )
                 required_coordinates = (
                     self.premise_id,
-                    self.premise_type,
                     self.premise_value,
                     self.premise_round,
                 )
+                if self.premise_id != "__full_grid__":
+                    required_coordinates = (
+                        *required_coordinates,
+                        self.premise_type,
+                    )
                 if any(value is None for value in required_coordinates):
                     raise ValueError(
                         "premise-pinned scoring needs complete coordinates"
@@ -171,6 +206,8 @@ class RawResult(StrictModel):
                         "premise-pinned coordinates cannot be blank"
                     )
             else:
+                if self.path is ElicitationPath.PLACEBO:
+                    raise ValueError("placebo records require a hard choice")
                 if self.premise_round is None:
                     raise ValueError(
                         "premise disclosure needs a premise round"
@@ -181,6 +218,7 @@ class RawResult(StrictModel):
                         self.premise_id,
                         self.premise_type,
                         self.premise_value,
+                        self.pinning_assignments,
                     )
                 ):
                     raise ValueError(
@@ -224,6 +262,13 @@ def raw_result_arrow_schema() -> pa.Schema:
             ),
         ]
     )
+    assignment_struct = pa.struct(
+        [
+            pa.field("premise_id", pa.string(), nullable=False),
+            pa.field("premise_type", pa.string(), nullable=False),
+            pa.field("premise_value", pa.string(), nullable=False),
+        ]
+    )
     return pa.schema(
         [
             pa.field("cache_key", pa.string(), nullable=False),
@@ -239,6 +284,7 @@ def raw_result_arrow_schema() -> pa.Schema:
             pa.field("premise_type", pa.string()),
             pa.field("premise_value", pa.string()),
             pa.field("premise_round", pa.int64()),
+            pa.field("pinning_assignments", pa.list_(assignment_struct)),
             pa.field("model_snapshot", pa.string(), nullable=False),
             pa.field("provider", pa.string(), nullable=False),
             pa.field("temperature", pa.float64(), nullable=False),
@@ -254,6 +300,7 @@ def raw_result_arrow_schema() -> pa.Schema:
             pa.field("parse_status", pa.string(), nullable=False),
             pa.field("provider_error", pa.string()),
             pa.field("http_status", pa.int64()),
+            pa.field("system_fingerprint", pa.string()),
             pa.field("retry_count", pa.int64(), nullable=False),
             pa.field("prompt_tokens", pa.int64()),
             pa.field("completion_tokens", pa.int64()),

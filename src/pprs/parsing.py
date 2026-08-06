@@ -3,7 +3,13 @@ from __future__ import annotations
 import json
 from json import JSONDecodeError
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    model_validator,
+)
 
 from pprs.providers.base import ResponseFormat
 from pprs.records.schema import ParseStatus, ParsedPremise
@@ -22,7 +28,19 @@ class ResponseSetPayload(StrictPayload):
 
 
 class PremiseDisclosurePayload(StrictPayload):
-    premises: tuple[ParsedPremise, ...] = Field(min_length=1)
+    premises: tuple[ParsedPremise, ...] = Field(
+        min_length=1,
+        max_length=4,
+    )
+
+    @model_validator(mode="after")
+    def validate_unique_premise_ids(self) -> "PremiseDisclosurePayload":
+        premise_ids = tuple(
+            premise.premise_id for premise in self.premises
+        )
+        if len(set(premise_ids)) != len(premise_ids):
+            raise ValueError("premise IDs must be unique within a disclosure")
+        return self
 
 
 class ParseResult(BaseModel):

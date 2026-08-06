@@ -82,6 +82,7 @@ def test_local_endpoint_configuration_is_forwarded(
                 )
             ],
             usage=SimpleNamespace(prompt_tokens=5, completion_tokens=3),
+            system_fingerprint="fp-fixture",
         )
 
     monkeypatch.setattr(litellm, "acompletion", fake_completion)
@@ -110,6 +111,9 @@ def test_local_endpoint_configuration_is_forwarded(
     assert captured["temperature"] == 0.7
     assert captured["top_p"] == 1.0
     assert captured["seed"] == 42
+    assert captured["max_completion_tokens"] == 64
+    assert captured["timeout"] == 120
+    assert captured["num_retries"] == 0
 
 
 def test_temperature_unsupported_model_fails_before_call(

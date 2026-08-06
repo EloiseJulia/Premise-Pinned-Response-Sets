@@ -8,9 +8,11 @@ from pprs.prompts import (
     PromptOption,
     disclosure_template_ids,
     load_task_framings,
+    matched_placebo_components,
     permute_options,
     render_disclosure_prompt,
     render_forced_choice_prompt,
+    render_full_grid_prompt,
     render_pinned_prompt,
     render_placebo_prompt,
     render_response_set_prompt,
@@ -202,6 +204,15 @@ def test_real_pin_and_placebo_share_syntax(
     assert placebo.length_delta == 0
 
 
+def test_placebo_components_match_real_lengths() -> None:
+    statement, value = matched_placebo_components(
+        "How strict is source support?",
+        "strict support",
+    )
+    assert len(statement) == len("How strict is source support?")
+    assert len(value) == len("strict support")
+
+
 def test_unknown_disclosure_template_fails(
     framings,
     nli_item,
@@ -267,6 +278,25 @@ def test_pinned_fields_reject_structural_injection(
             ),
             premise_value="value",
         )
+
+
+def test_full_grid_prompt_contains_each_assignment(
+    framings,
+    nli_options,
+    nli_item,
+) -> None:
+    rendered = render_full_grid_prompt(
+        framings[TaskId.CHAOSNLI_SNLI],
+        nli_item,
+        nli_options,
+        42,
+        assignments=(
+            ("How strict is support?", "strict"),
+            ("How is time read?", "broadly"),
+        ),
+    )
+    assert rendered.template_id == "premise-full-grid-v1"
+    assert rendered.text.count("Premise:") == 2
 
 
 @pytest.mark.parametrize(

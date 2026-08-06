@@ -1,8 +1,8 @@
 # PPRS Confirmatory Preregistration
 
-**Config:** `configs/runs/confirmatory-v1.json`  
-**Status:** Draft pending leakage-audit completion, independent audit, freeze
-commit, and preregistration tag.
+**Config:** `configs/runs/confirmatory-v1.json`
+**Status:** Ready for independent freeze audit, freeze manifest, freeze commit,
+and preregistration tag.
 
 ## Research Questions
 
@@ -17,9 +17,13 @@ rating distributions than a directly self-reported response set?
 ### H1: Self-report and pinning measure different sensitivity
 
 Across task-judge cells, Pearson correlation between `beta_self` and `beta_pin`
-is predicted to be below 0.4. Report the coefficient, cell-level scatter, and
-confidence interval. A correlation at or above 0.4 is reported as evidence for
-the upstream self-report construct rather than treated as no result.
+at temperature 0.7 is predicted to be below 0.4. Cells with a null beta are
+excluded and counted. Report Pearson `r`, the 12-cell scatter, and a 95%
+percentile confidence interval from 10,000 bootstrap resamples of task-judge
+cells with seed 42. H1's directional prediction is met when point `r < 0.4`;
+call it bootstrap-robust only when the upper confidence limit is below 0.4. A
+correlation at or above 0.4 is reported as evidence for the upstream self-report
+construct rather than treated as no result.
 
 ### H2: Nontrivial dangerous mass
 
@@ -28,7 +32,13 @@ More than 15% of item-judge cells are predicted to satisfy:
 `H_seed <= 0.5 bit` and `H_ctx > 0`.
 
 The direction is immutable. High `H_seed` is visible uncertainty and is never
-called the dangerous quadrant.
+called the dangerous quadrant. The denominator is every temperature-0.7
+item-judge cell with non-null `H_seed` and `H_ctx`; report excluded cells and
+reasons. The pooled point estimate is the primary test. A 95% percentile
+interval uses 10,000 bootstrap resamples of items within task, retaining all
+judges for each sampled item, seed 42. The prediction is met when the point
+estimate is above 15%; call it bootstrap-robust only when the lower limit is
+above 15%. Per-task proportions are reported without replacing the pooled test.
 
 ### H3: PPRS better matches observed human distributions
 
@@ -40,6 +50,20 @@ ChaosNLI-SNLI < ChaosNLI-MNLI < SummEval-Relevance.
 
 Evidence strength is reported separately because SummEval has only eight human
 ratings per item.
+
+For each item, judge, and `pi`, construct the binary human response-set vector.
+The self vector is the per-option inclusion frequency across valid S repeats.
+The pin vector is the binary PPRS union. Define item loss as the sum of squared
+option-wise errors and define advantage
+`Delta = MSE_self - MSE_pin` (positive favors PPRS). Average items equally,
+then judges equally, within task. Report every `pi`; report both SummEval
+polarities.
+
+The preregistered H3 directional prediction is met when the median task
+advantage over the five locked `pi` values is positive for all three tasks and
+is ordered `SNLI <= MNLI <= SummEval` under both SummEval polarity arms.
+Item-level 95% percentile intervals use 10,000 within-task bootstrap resamples,
+seed 42. No polarity or `pi` point is selected after seeing results.
 
 ## Data
 
@@ -83,9 +107,28 @@ proposal cache identity.
 ## Metrics
 
 - `H_seed`: Shannon entropy in bits over F choices.
-- `H_ctx`: Shannon entropy in bits after marginalizing P pinned choices over
-  candidate values.
+- `H_ctx`: for each disclosure round and surfaced premise, form a label
+  distribution by weighting its valid candidate values equally. Average premise
+  distributions equally within a round, then average valid rounds equally.
+  Compute Shannon entropy in bits from the resulting label distribution.
+- A premise contributes only when at least two distinct candidate values have
+  valid pinned choices. A round contributes only when at least one premise
+  contributes. If no round contributes, `H_ctx` is null, never zero-filled.
 - PPRS: union of labels observed under valid one-dimension pins.
+- Repeated premise IDs across disclosure rounds are retained as separate
+  self-disclosure observations. Duplicate premise IDs within one response are a
+  parse failure.
+- `beta_self`: pooled over valid paired F/S samples within each task-judge-
+  temperature cell, estimate `P(positive option is in S | F chose the upstream
+  negative option)`. Pair by item and sample ID.
+- `beta_pin`: over the same valid negative F samples, estimate
+  `P(positive option is in the item PPRS | F chose the upstream negative
+  option)`.
+- Positive/negative mapping follows the pinned upstream task contract:
+  Entailment/Contradiction for SNLI and MNLI; Relevant/Not Relevant for
+  SummEval. Neutral does not enter the beta denominator.
+- If a beta denominator is zero, the cell is null and excluded from correlation;
+  it is never imputed.
 - Human ChaosNLI response set: include an option iff its human share is at least
   `pi`.
 - `pi`: full grid 0.05, 0.10, 0.15, 0.20, 0.25.
@@ -94,6 +137,13 @@ proposal cache identity.
   conventions as a specification curve.
 
 No selected threshold replaces the complete scan surface.
+
+The primary H1/H2/H3 tests use temperature 0.7. Temperature 0 is a
+preregistered greedy-decoding ablation and is reported with the same metrics.
+This avoids mechanically defining every temperature-0 cell as low seed entropy.
+
+For `H_seed`, require at least two valid F samples. For all metrics, report valid
+sample counts and failure rates alongside estimates.
 
 ## Primary Outputs
 
@@ -105,6 +155,13 @@ No selected threshold replaces the complete scan surface.
    human-distribution optimum, reporting Hit Rate, both KL directions,
    Coverage, `MSE_self`, and `MSE_pin`.
 
+For each task, threshold, polarity arm where applicable, and downstream metric,
+each candidate metric selects its optimizing judge using its preregistered
+direction. Exact ties are broken by lexicographically ascending model ID.
+Consistency regret is `max_j consistency_j - consistency_selected`; bias regret
+is `bias_mae_selected - min_j bias_mae_j`. Report the complete threshold
+surface; any aggregate gives equal weight to tasks and grid cells.
+
 ## Ablations and Audits
 
 - temperature 0 versus 0.7;
@@ -115,6 +172,36 @@ No selected threshold replaces the complete scan surface.
   `mai-code-1-flash-picker`, outside the measured panel;
 - both SummEval polarity conventions;
 - all parse/provider failures reported, never imputed.
+
+### Placebo estimand
+
+For each valid real-pin/placebo matched pair, compare each choice with the
+item-model-temperature forced-choice modal label (ties broken by task option
+order). Define real and placebo flip indicators. Primary placebo contrast is
+the mean matched difference `real_flip - placebo_flip`, with 10,000
+item-cluster bootstrap resamples, seed 42. Also report real-pin and placebo
+entropies using the same hierarchical weighting. Report adverse or null
+contrasts.
+
+### Full-grid estimand
+
+On the committed 20-item/task subset, within each disclosure round enumerate
+the Cartesian product containing one value from every valid surfaced premise
+(maximum four premises, two or three values each). Each combination receives
+one forced-choice call. Weight combinations equally within round and valid
+rounds equally. Report full-grid entropy, full-grid label union, the difference
+from one-dimensional `H_ctx`, and Jaccard similarity with the one-dimensional
+PPRS. A round needs at least two valid grid combinations; otherwise its entropy
+is null. This is an ablation, not a confirmatory hypothesis.
+
+## Generation Controls
+
+- forced-choice/pinned/placebo max completion tokens: 64;
+- response-set max completion tokens: 128;
+- premise-disclosure max completion tokens: 2048;
+- request timeout: 120 seconds;
+- provider retry count: 0 (each failure remains an explicit record);
+- no fallback model or success-shaped retry.
 
 ## Smoke Gate
 

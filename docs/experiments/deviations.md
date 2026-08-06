@@ -26,3 +26,28 @@ Record a deviation before changing any locked proposal value. Each entry must in
 - **Implementation:** selected template
   `premise-disclosure-inventory-v2`; raw artifacts remain under
   `artifacts/wp4-pilot-*`.
+
+## 2026-08-07: Exact service slugs without dated deployment IDs
+
+- **Affected lock:** Model identities must be immutable snapshots rather than
+  aliases that can drift.
+- **Decision:** Use exact `ghc-api` service IDs
+  `gemini-3.1-pro-preview` and `gemini-3.5-flash` because no date-qualified
+  Google deployment IDs are exposed by the approved local service. Freeze the
+  `/models` roster hash, exact slugs, and call timestamps. Record
+  `system_fingerprint` when available and stop if a non-null value changes
+  within a run.
+- **Reason:** Two-vendor/two-tier coverage cannot be achieved from the currently
+  callable service using only date-qualified IDs. Anthropic IDs are listed but
+  return “requested model is not supported.”
+- **Alternatives considered:** use only dated OpenAI models, violating the
+  two-vendor design; use unsupported Anthropic IDs; stop all work pending a
+  different service.
+- **Expected impact:** The service currently returns
+  `system_fingerprint=null`, so exact numeric reproduction may be weaker for the
+  Google arms. The roster hash does not prove weight immutability. Claims remain
+  limited to call-time service snapshots and directionality.
+- **Approval:** The owner explicitly authorized `ghc-api` model selection and
+  smoke/full progression in the overnight GO.
+- **Implementation:** `configs/runs/confirmatory-v1.json`,
+  `docs/research/model-snapshots.md`, and per-call `system_fingerprint`.

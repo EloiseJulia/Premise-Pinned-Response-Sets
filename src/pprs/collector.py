@@ -19,6 +19,7 @@ from pprs.providers.base import (
 from pprs.records.schema import (
     ElicitationPath,
     ParseStatus,
+    PinAssignment,
     PremiseType,
     RawResult,
 )
@@ -39,6 +40,7 @@ class CollectionContext(BaseModel):
     premise_type: PremiseType | None = None
     premise_value: str | None = None
     premise_round: int | None = Field(default=None, ge=0)
+    pinning_assignments: tuple[PinAssignment, ...] | None = None
     prompt_template_id: str = Field(min_length=1)
     option_permutation_seed: int
     valid_tokens: tuple[str, ...] = Field(min_length=2)
@@ -59,21 +61,41 @@ class CollectionContext(BaseModel):
             self.premise_value,
             self.premise_round,
         )
-        if self.path is not ElicitationPath.PREMISE_PINNED:
-            if any(value is not None for value in coordinates):
+        if self.path not in {
+            ElicitationPath.PREMISE_PINNED,
+            ElicitationPath.PLACEBO,
+        }:
+            if any(
+                value is not None
+                for value in (*coordinates, self.pinning_assignments)
+            ):
                 raise ValueError(
                     "non-premise collection cannot carry premise coordinates"
                 )
             return self
 
         is_disclosure = (
+            self.path is ElicitationPath.PREMISE_PINNED
+            and
             self.premise_id is None
             and self.premise_type is None
             and self.premise_value is None
             and self.premise_round is not None
         )
-        is_scoring = all(value is not None for value in coordinates)
-        if not (is_disclosure or is_scoring):
+        is_scoring = (
+            all(value is not None for value in coordinates)
+            and self.pinning_assignments is None
+        )
+        is_full_grid = (
+            self.path is ElicitationPath.PREMISE_PINNED
+            and self.premise_id == "__full_grid__"
+            and self.premise_type is None
+            and self.premise_value is not None
+            and self.premise_round is not None
+            and self.pinning_assignments is not None
+            and len(self.pinning_assignments) >= 1
+        )
+        if not (is_disclosure or is_scoring or is_full_grid):
             raise ValueError(
                 "premise collection must be disclosure or complete scoring"
             )
@@ -144,14 +166,14 @@ class Collector:
         context: CollectionContext,
     ) -> None:
         response_format = request.identity.response_format
-        if context.path in {
-            ElicitationPath.FORCED_CHOICE,
-            ElicitationPath.PLACEBO,
-        }:
+        if context.path is ElicitationPath.FORCED_CHOICE:
             expected = "forced_choice_json_v1"
         elif context.path is ElicitationPath.MULTI_LABEL:
             expected = "response_set_json_v1"
-        elif context.premise_id is None:
+        elif (
+            context.path is ElicitationPath.PREMISE_PINNED
+            and context.premise_id is None
+        ):
             expected = "premise_disclosure_json_v1"
         else:
             expected = "forced_choice_json_v1"
@@ -182,6 +204,7 @@ class Collector:
             "premise_type": context.premise_type,
             "premise_value": context.premise_value,
             "premise_round": context.premise_round,
+            "pinning_assignments": context.pinning_assignments,
             "model_snapshot": identity.model_snapshot,
             "provider": request.provider,
             "temperature": identity.temperature,
@@ -223,6 +246,7 @@ class Collector:
             raw_text=response.raw_text,
             provider_error=None,
             http_status=response.http_status,
+            system_fingerprint=response.system_fingerprint,
             retry_count=response.retry_count,
             prompt_tokens=response.prompt_tokens,
             completion_tokens=response.completion_tokens,
@@ -248,6 +272,7 @@ class Collector:
             raw_text=raw_text,
             provider_error=provider_error,
             http_status=http_status,
+            system_fingerprint=None,
             retry_count=retry_count,
             prompt_tokens=None,
             completion_tokens=None,
@@ -263,6 +288,7 @@ class Collector:
         raw_text: str,
         provider_error: str | None,
         http_status: int | None,
+        system_fingerprint: str | None,
         retry_count: int,
         prompt_tokens: int | None,
         completion_tokens: int | None,
@@ -283,6 +309,7 @@ class Collector:
             premise_type=context.premise_type,
             premise_value=context.premise_value,
             premise_round=context.premise_round,
+            pinning_assignments=context.pinning_assignments,
             model_snapshot=identity.model_snapshot,
             provider=request.provider,
             temperature=identity.temperature,
@@ -298,6 +325,7 @@ class Collector:
             parse_status=parse_result.status,
             provider_error=provider_error,
             http_status=http_status,
+            system_fingerprint=system_fingerprint,
             retry_count=retry_count,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,

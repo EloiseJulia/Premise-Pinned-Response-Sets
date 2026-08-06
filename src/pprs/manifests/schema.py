@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -17,6 +18,7 @@ class SummEvalPolarity(StrEnum):
 
 
 class RunManifest(StrictModel):
+    manifest_role: Literal["raw_collection", "analysis"]
     run_tag: str = Field(min_length=1)
     git_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     prereg_tag: str | None
@@ -80,8 +82,19 @@ class RunManifest(StrictModel):
             task_key == "summeval_relevance"
             for task_key in self.dataset_revisions
         )
-        if includes_summeval and self.summ_eval_polarity is None:
+        if (
+            self.manifest_role == "analysis"
+            and includes_summeval
+            and self.summ_eval_polarity is None
+        ):
             raise ValueError("SummEval manifests require a polarity identity")
+        if (
+            self.manifest_role == "raw_collection"
+            and self.summ_eval_polarity is not None
+        ):
+            raise ValueError(
+                "raw collection manifests cannot select a polarity"
+            )
         if not includes_summeval and self.summ_eval_polarity is not None:
             raise ValueError(
                 "non-SummEval manifests cannot carry a polarity identity"

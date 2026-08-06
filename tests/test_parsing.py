@@ -87,3 +87,19 @@ def test_unknown_response_format_fails() -> None:
             "unknown_format",
             ("A", "B"),
         )
+
+
+def test_disclosure_rejects_more_than_four_premises() -> None:
+    premise = {
+        "premise_id": "p",
+        "premise_type": "vagueness",
+        "statement": "question",
+        "candidate_values": ["a", "b"],
+    }
+    payload = {"premises": [{**premise, "premise_id": f"p{i}"} for i in range(5)]}
+    result = parse_response(
+        __import__("json").dumps(payload),
+        ResponseFormat.PREMISE_DISCLOSURE_JSON,
+        ("A", "B"),
+    )
+    assert result.status is ParseStatus.MALFORMED_JSON

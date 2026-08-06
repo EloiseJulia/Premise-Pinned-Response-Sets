@@ -2,7 +2,11 @@ import pytest
 from pydantic import ValidationError
 
 from pprs.records.schema import ParseStatus, RawResult, raw_result_arrow_schema
-from pprs.records.schema import ParsedPremise, PremiseType
+from pprs.records.schema import (
+    ParsedPremise,
+    PinAssignment,
+    PremiseType,
+)
 
 
 def test_failure_records_require_null_parsed_fields(raw_result: RawResult) -> None:
@@ -84,6 +88,58 @@ def test_premise_candidate_values_must_be_distinct() -> None:
             statement="How much source coverage is required?",
             candidate_values=("strict", "strict"),
         )
+
+
+def test_placebo_scoring_requires_coordinates(raw_result: RawResult) -> None:
+    payload = raw_result.model_dump()
+    payload["path"] = "placebo"
+    with pytest.raises(ValidationError, match="complete coordinates"):
+        RawResult.model_validate(payload)
+
+
+def test_placebo_scoring_accepts_complete_coordinates(
+    raw_result: RawResult,
+) -> None:
+    payload = raw_result.model_dump()
+    payload.update(
+        {
+            "path": "placebo",
+            "premise_id": "placebo:coverage",
+            "premise_type": "vagueness",
+            "premise_value": "blue",
+            "premise_round": 0,
+        }
+    )
+    assert RawResult.model_validate(payload).path.value == "placebo"
+
+
+def test_full_grid_scoring_requires_explicit_assignments(
+    raw_result: RawResult,
+) -> None:
+    payload = raw_result.model_dump()
+    payload.update(
+        {
+            "path": "premise_pinned",
+            "premise_id": "__full_grid__",
+            "premise_type": None,
+            "premise_value": "canonical-json",
+            "premise_round": 0,
+            "pinning_assignments": (
+                PinAssignment(
+                    premise_id="coverage",
+                    premise_type=PremiseType.VAGUENESS,
+                    premise_value="strict",
+                ),
+                PinAssignment(
+                    premise_id="scope",
+                    premise_type=PremiseType.AMBIGUITY,
+                    premise_value="broad",
+                ),
+            ),
+        }
+    )
+    validated = RawResult.model_validate(payload)
+    assert validated.premise_id == "__full_grid__"
 
 
 @pytest.mark.parametrize("parse_status", ["ok", "timeout"])

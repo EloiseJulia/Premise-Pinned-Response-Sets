@@ -72,6 +72,7 @@ def test_summeval_polarity_arms_have_distinct_outputs(
         {
             **run_manifest.model_dump(),
             **summeval_updates,
+            "manifest_role": "analysis",
             "summ_eval_polarity": SummEvalPolarity.UPSTREAM_BEHAVIOR,
         }
     )
@@ -79,6 +80,7 @@ def test_summeval_polarity_arms_have_distinct_outputs(
         {
             **run_manifest.model_dump(),
             **summeval_updates,
+            "manifest_role": "analysis",
             "summ_eval_polarity": SummEvalPolarity.SEMANTIC_ALIGNED,
         }
     )
@@ -170,6 +172,7 @@ def test_summeval_manifest_requires_polarity(
         "summeval_relevance": "c" * 64
     }
     payload["summ_eval_polarity"] = None
+    payload["manifest_role"] = "analysis"
 
     with pytest.raises(ValidationError, match="require a polarity"):
         RunManifest.model_validate(payload)

@@ -6,6 +6,7 @@ from pprs.leakage_audit import (
     audit_key,
     build_auditor_prompt,
     parse_audit_payload,
+    validate_audit_evidence,
 )
 from pprs.prompts import TaskFraming
 
@@ -49,6 +50,7 @@ def test_auditor_prompt_separates_static_and_source() -> None:
     assert "do not blame the static prompt" in " ".join(
         prompt.lower().split()
     )
+    assert "Task option labels/markers to watch for" not in prompt
 
 
 def test_audit_payload_is_strict_json() -> None:
@@ -58,6 +60,8 @@ def test_audit_payload_is_strict_json() -> None:
                 "leakage": False,
                 "categories": [],
                 "rationale": "No option terms in static framing.",
+                "static_evidence": "Generic rubric language",
+                "source_evidence": "entailment",
             }
         )
     )
@@ -86,3 +90,52 @@ def test_audit_key_changes_with_endpoint() -> None:
 
 def test_auditor_completion_budget_supports_long_prompts() -> None:
     assert AUDITOR_MAX_COMPLETION_TOKENS >= 2048
+
+
+def test_audit_evidence_must_quote_correct_sections() -> None:
+    payload = parse_audit_payload(
+        json.dumps(
+            {
+                "leakage": False,
+                "categories": [],
+                "rationale": "No leakage.",
+                "static_evidence": "static phrase",
+                "source_evidence": "source phrase",
+            }
+        )
+    )
+    validate_audit_evidence(
+        payload,
+        static_prompt="contains static phrase",
+        source_item="contains source phrase",
+    )
+    bad = payload.model_copy(update={"static_evidence": "auditor text"})
+    try:
+        validate_audit_evidence(
+            bad,
+            static_prompt="contains static phrase",
+            source_item="contains source phrase",
+        )
+    except ValueError as exc:
+        assert "static evidence" in str(exc)
+    else:
+        raise AssertionError("unquoted audit evidence must fail")
+
+
+def test_audit_evidence_allows_static_line_wrapping() -> None:
+    payload = parse_audit_payload(
+        json.dumps(
+            {
+                "leakage": False,
+                "categories": [],
+                "rationale": "No leakage.",
+                "static_evidence": "Do not predict a label.",
+                "source_evidence": "no label-like source phrase",
+            }
+        )
+    )
+    validate_audit_evidence(
+        payload,
+        static_prompt="Do not\npredict a label.",
+        source_item="source",
+    )

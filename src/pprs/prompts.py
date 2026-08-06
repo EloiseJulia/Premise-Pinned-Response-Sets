@@ -361,6 +361,37 @@ def render_pinned_prompt(
     )
 
 
+def render_full_grid_prompt(
+    framing: TaskFraming,
+    item: dict[str, str],
+    options: tuple[PromptOption, ...],
+    seed: int,
+    *,
+    assignments: tuple[tuple[str, str], ...],
+) -> RenderedPrompt:
+    if len(assignments) < 1:
+        raise ValueError("full-grid prompt requires at least one assignment")
+    lines = []
+    for index, (statement, value) in enumerate(assignments, start=1):
+        _validate_pin_component(statement, "premise statement")
+        _validate_pin_component(value, "premise value")
+        lines.append(
+            f"{index}. Premise: {statement}\n   Resolution: {value}"
+        )
+    prefix = (
+        "For this rating only, use all of these resolutions of otherwise "
+        "unspecified scoring premises:\n" + "\n".join(lines)
+    )
+    return _render_rating_prompt(
+        framing,
+        item,
+        options,
+        seed,
+        template_id="premise-full-grid-v1",
+        instruction="Select exactly one option that best applies:",
+        response_example='{"choice":"<token>"}',
+        prefix=prefix,
+    )
 def render_placebo_prompt(
     framing: TaskFraming,
     item: dict[str, str],
@@ -386,17 +417,13 @@ def render_placebo_prompt(
         premise_statement=matched_premise_statement,
         premise_value=matched_premise_value,
     )
+    placebo_statement, placebo_value = matched_placebo_components(
+        matched_premise_statement,
+        matched_premise_value,
+    )
     prefix = _PIN_CLAUSE.format(
-        premise_statement=_match_length(
-            _PLACEBO_PREMISE,
-            len(matched_premise_statement),
-            "x",
-        ),
-        premise_value=_match_length(
-            _PLACEBO_VALUE,
-            len(matched_premise_value),
-            "y",
-        ),
+        premise_statement=placebo_statement,
+        premise_value=placebo_value,
     )
     rendered = _render_rating_prompt(
         framing,
@@ -431,3 +458,29 @@ def _match_length(base: str, target_length: int, pad: str) -> str:
     if target_length <= len(base):
         return base[:target_length]
     return base + (pad * (target_length - len(base)))
+
+
+def matched_placebo_components(
+    matched_premise_statement: str,
+    matched_premise_value: str,
+) -> tuple[str, str]:
+    _validate_pin_component(
+        matched_premise_statement,
+        "matched premise statement",
+    )
+    _validate_pin_component(
+        matched_premise_value,
+        "matched premise value",
+    )
+    return (
+        _match_length(
+            _PLACEBO_PREMISE,
+            len(matched_premise_statement),
+            "x",
+        ),
+        _match_length(
+            _PLACEBO_VALUE,
+            len(matched_premise_value),
+            "y",
+        ),
+    )

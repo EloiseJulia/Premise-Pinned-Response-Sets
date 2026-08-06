@@ -97,6 +97,7 @@ class LiteLLMProvider(Provider):
         settings: LiteLLMProviderSettings | None = None,
     ) -> None:
         self.settings = settings or LiteLLMProviderSettings()
+        self.invocation_count = 0
 
     async def complete(self, request: ProviderRequest) -> ProviderResponse:
         import litellm
@@ -114,6 +115,11 @@ class LiteLLMProvider(Provider):
                 "model snapshot does not support the locked temperature field"
             )
         model = f"{request.provider}/{identity.model_snapshot}"
+        max_completion_tokens = {
+            "forced_choice_json_v1": 64,
+            "response_set_json_v1": 128,
+            "premise_disclosure_json_v1": 2048,
+        }[identity.response_format.value]
         call_kwargs: dict[str, Any] = {}
         if self.settings.api_base is not None:
             call_kwargs["api_base"] = self.settings.api_base.rstrip("/")
@@ -133,6 +139,7 @@ class LiteLLMProvider(Provider):
         sanitized_failure: ProviderFailure | ProviderTimeout | None = None
         response: Any | None = None
         try:
+            self.invocation_count += 1
             response: Any = await litellm.acompletion(
                 model=model,
                 messages=[
@@ -141,6 +148,9 @@ class LiteLLMProvider(Provider):
                 temperature=identity.temperature,
                 top_p=identity.top_p,
                 seed=identity.seed,
+                max_completion_tokens=max_completion_tokens,
+                timeout=120,
+                num_retries=0,
                 response_format={"type": "json_object"},
                 **call_kwargs,
             )
@@ -204,6 +214,11 @@ class LiteLLMProvider(Provider):
         return ProviderResponse(
             raw_text=choice.message.content or "",
             http_status=200,
+            system_fingerprint=getattr(
+                response,
+                "system_fingerprint",
+                None,
+            ),
             prompt_tokens=getattr(usage, "prompt_tokens", None),
             completion_tokens=getattr(usage, "completion_tokens", None),
             retry_count=0,

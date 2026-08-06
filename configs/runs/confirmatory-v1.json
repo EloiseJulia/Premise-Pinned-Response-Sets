@@ -45,7 +45,8 @@
   "provider": {
     "adapter": "litellm_openai_compatible",
     "service": "local_ghc_api",
-    "metadata_retrieved_at": "2026-08-07T01:09:00+08:00"
+    "metadata_retrieved_at": "2026-08-07T01:09:00+08:00",
+    "models_endpoint_sha256": "0f17e867c0fd3d36c30232982bd4e43a30d31bbb1dd65d64d72ad38839513ac0"
   },
   "prompt": {
     "premise_disclosure_template_id": "premise-disclosure-inventory-v2",
@@ -75,6 +76,13 @@
   ],
   "top_p": 1.0,
   "response_format": "strict_json",
+  "generation_controls": {
+    "forced_choice_max_completion_tokens": 64,
+    "response_set_max_completion_tokens": 128,
+    "premise_disclosure_max_completion_tokens": 2048,
+    "request_timeout_seconds": 120,
+    "provider_retries": 0
+  },
   "option_permutation": {
     "enabled": true,
     "seed_policy": "coordinate_hash_namespace_option_permutation"
@@ -103,20 +111,65 @@
     "danger_h_seed_max_bits": 0.5,
     "danger_h_ctx_min_exclusive_bits": 0.0
   },
+  "analysis": {
+    "primary_temperature": 0.7,
+    "temperature_zero_role": "greedy_decoding_ablation",
+    "h_seed_minimum_valid_samples": 2,
+    "h_ctx_weighting": "equal candidate values within premise; equal valid premises within round; equal valid rounds",
+    "h_ctx_minimum_valid_values_per_premise": 2,
+    "pprs_union": "all valid one-dimension pinned labels including singleton surviving pins",
+    "failure_treatment": "exclude invalid cells and report coverage; never impute",
+    "beta_options": {
+      "chaosnli_snli": {
+        "positive": "A",
+        "negative": "C"
+      },
+      "chaosnli_mnli": {
+        "positive": "A",
+        "negative": "C"
+      },
+      "summeval_relevance": {
+        "positive": "A",
+        "negative": "B"
+      }
+    },
+    "beta_self": "pooled paired P(positive in S | valid F negative) by task-judge-temperature",
+    "beta_pin": "pooled P(positive in item PPRS | valid F negative) by task-judge-temperature",
+    "zero_beta_denominator": "null",
+    "bootstrap_replicates": 10000,
+    "bootstrap_seed": 42,
+    "h1_unit": "task-judge cell",
+    "h2_unit": "item clustered within task retaining judges",
+    "h3_loss": "sum squared error to binary human response-set vector",
+    "h3_advantage": "MSE_self - MSE_pin",
+    "judge_tie_break": "lexicographically ascending model_snapshot"
+  },
   "ablations": {
     "full_grid_items_per_task": 20,
+    "full_grid_subset_id": "full-grid-ablation-v1",
+    "full_grid_subset_hash": "f488632816f1f6da2d968ef157a2b94d93cf1b4886df9676fd11bafdd59331aa",
     "placebo": true,
+    "placebo_estimand": "matched real-minus-placebo flip rate relative to forced-choice modal label",
+    "full_grid_estimand": "equal grid combinations within round; equal valid rounds; entropy/union/delta-H/Jaccard",
     "leakage_audit_items_per_task": 30,
     "leakage_auditor_model": "mai-code-1-flash-picker"
   },
   "smoke": {
     "items": 10,
+    "subset_id": "smoke-v1",
+    "subset_hash": "fd32e13fd7f0f8cbce500aec8f91fe65765af114825718f96eda3b58a7a17bef",
     "models": [
       "gpt-5.4",
       "gemini-3.5-flash"
     ],
     "minimum_parse_success": 0.95,
     "rerun_cache_hit_rate": 1.0,
-    "manual_records": 20
+    "human_manual_records": 20
+  },
+  "model_drift_gate": {
+    "record_system_fingerprint": true,
+    "system_fingerprint_observed_in_probe": false,
+    "stop_on_nonnull_fingerprint_change_within_model_slug": true,
+    "fallback_identity": "exact service slug + models endpoint hash + call timestamp"
   }
 }

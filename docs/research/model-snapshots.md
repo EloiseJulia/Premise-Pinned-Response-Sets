@@ -39,3 +39,11 @@ exposes immutable deployment IDs, those should replace the preview/stable slugs
 before the confirmatory full run; otherwise the study may claim only
 snapshot-at-call-time directionality, as required by the proposal’s model-drift
 boundary.
+
+The local service returned `system_fingerprint=null` in compatibility probes.
+The canonical sorted `/models` metadata observed on 2026-08-07 has SHA-256:
+
+`0f17e867c0fd3d36c30232982bd4e43a30d31bbb1dd65d64d72ad38839513ac0`.
+
+This roster hash detects service-list changes but does not prove model-weight
+immutability.

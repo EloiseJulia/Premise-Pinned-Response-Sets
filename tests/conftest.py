@@ -48,6 +48,7 @@ def raw_result() -> RawResult:
         premise_type=None,
         premise_value=None,
         premise_round=None,
+        pinning_assignments=None,
         model_snapshot="mock-snapshot",
         provider="mock",
         temperature=0.0,
@@ -63,6 +64,7 @@ def raw_result() -> RawResult:
         parse_status=ParseStatus.OK,
         provider_error=None,
         http_status=200,
+        system_fingerprint="fixture-fingerprint",
         retry_count=0,
         prompt_tokens=10,
         completion_tokens=1,
@@ -74,6 +76,7 @@ def raw_result() -> RawResult:
 @pytest.fixture
 def run_manifest() -> RunManifest:
     return RunManifest(
+        manifest_role="raw_collection",
         run_tag="fixture",
         git_sha="d" * 40,
         prereg_tag=None,

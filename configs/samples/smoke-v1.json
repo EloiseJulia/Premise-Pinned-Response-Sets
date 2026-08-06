@@ -1,0 +1,23 @@
+{
+  "items": {
+    "chaosnli_mnli": [
+      "135401n",
+      "21212e",
+      "115954n"
+    ],
+    "chaosnli_snli": [
+      "7421349720.jpg#1r1n",
+      "2645745905.jpg#0r1n",
+      "2892992529.jpg#0r1n",
+      "6473658975.jpg#3r1n"
+    ],
+    "summeval_relevance": [
+      "dm-test-7cba80e83b222801fed8d6f96e8c0aa381c54b28::row-526",
+      "dm-test-2c6695b438980783754f7db28129ec2fbb3e6e21::row-354",
+      "dm-test-0783c68a744df6afa009d16e72709f2b4d90dea1::row-168"
+    ]
+  },
+  "selection_policy": "first committed sample-manifest IDs",
+  "subset_hash": "fd32e13fd7f0f8cbce500aec8f91fe65765af114825718f96eda3b58a7a17bef",
+  "subset_id": "smoke-v1"
+}
