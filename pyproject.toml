@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "premise-pinned-response-sets"
+version = "0.1.0"
+description = "Auditable experiment infrastructure for premise-pinned response sets"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "filelock>=3.20,<4",
+    "litellm>=1.77,<2",
+    "pandas>=2.3,<3",
+    "pydantic>=2.11,<3",
+    "pyarrow>=21,<22",
+    "tzdata>=2025.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4,<9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pprs"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

@@ -25,6 +25,7 @@ htmlcov/
 artifacts/
 data/cache/
 data/raw/
+data/processed/
 reports/
 *.parquet
 *.sqlite

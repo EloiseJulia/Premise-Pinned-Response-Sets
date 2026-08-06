@@ -1,0 +1,61 @@
+{
+  "task_id": "summeval_relevance",
+  "source_dataset": "SummEval",
+  "source_uri": "https://huggingface.co/datasets/lguerdan/indeterminacy-datasets/blob/37b8d7863430ec3433d6a73da08408b064643b8b/SummEval/summ_eval_processed.csv",
+  "source_download_uri": "https://huggingface.co/datasets/lguerdan/indeterminacy-datasets/resolve/37b8d7863430ec3433d6a73da08408b064643b8b/SummEval/summ_eval_processed.csv",
+  "source_revision": "37b8d7863430ec3433d6a73da08408b064643b8b",
+  "source_object_id": "5f3c386bf230cfa0d53fec293cfb56bf7ac76637",
+  "source_split": "all",
+  "sample_size": 150,
+  "sampling_seed": null,
+  "input_fields": [
+    "article",
+    "summary"
+  ],
+  "options": [
+    {
+      "token": "A",
+      "label": "Relevant",
+      "source_label": "relevant"
+    },
+    {
+      "token": "B",
+      "label": "Not Relevant",
+      "source_label": "not_relevant"
+    }
+  ],
+  "valid_response_sets": [
+    "A",
+    "B",
+    "AB"
+  ],
+  "analysis_conventions": {
+    "upstream_behavior": {
+      "A": "relevance_0",
+      "B": "relevance_1"
+    },
+    "semantic_aligned": {
+      "A": "relevance_1",
+      "B": "relevance_0"
+    }
+  },
+  "ratings_per_item": 8,
+  "license": {
+    "identifier": "MIT",
+    "source_url": "https://github.com/Yale-LILY/SummEval/blob/81b59ad53d63cb6009764240853c91235a44e238/LICENSE",
+    "source_revision": "81b59ad53d63cb6009764240853c91235a44e238",
+    "source_blob": "fbe02d55ba3e128a8b75d1e2c90bd067e2fa9086",
+    "caveat": "CNN/DailyMail source-material and model-output permissions require separate release review."
+  },
+  "data_card": {
+    "source_url": "https://github.com/Yale-LILY/SummEval/blob/81b59ad53d63cb6009764240853c91235a44e238/README.md",
+    "source_revision": "81b59ad53d63cb6009764240853c91235a44e238",
+    "source_blob": "4b54cd7db70990ba8e22a947cf4bd5c9132acd0c"
+  },
+  "upstream_reference": {
+    "repository": "https://github.com/lguerdan/indeterminacy",
+    "commit": "efdb3a2792369e2f98b86dd1d25c2f9c477c115a",
+    "path": "config/tasks.py",
+    "blob": "818b0aedb2281323f8440d8e0ddd8cbe0af50163"
+  }
+}

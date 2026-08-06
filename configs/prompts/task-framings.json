@@ -1,0 +1,51 @@
+{
+  "chaosnli_snli": {
+    "criterion": "Assess the semantic relationship between the statement and the context according to the intended rating rubric.",
+    "item_fields": [
+      "context",
+      "statement"
+    ],
+    "forbidden_labels": [
+      "entailment",
+      "neutral",
+      "contradiction"
+    ],
+    "forbidden_option_markers": [
+      "A.",
+      "B.",
+      "C."
+    ]
+  },
+  "chaosnli_mnli": {
+    "criterion": "Assess the semantic relationship between the statement and the context according to the intended rating rubric.",
+    "item_fields": [
+      "context",
+      "statement"
+    ],
+    "forbidden_labels": [
+      "entailment",
+      "neutral",
+      "contradiction"
+    ],
+    "forbidden_option_markers": [
+      "A.",
+      "B.",
+      "C."
+    ]
+  },
+  "summeval_relevance": {
+    "criterion": "Assess how well the summary selects important source content while avoiding redundancy and excess information.",
+    "item_fields": [
+      "article",
+      "summary"
+    ],
+    "forbidden_labels": [
+      "relevant",
+      "not relevant"
+    ],
+    "forbidden_option_markers": [
+      "A.",
+      "B."
+    ]
+  }
+}

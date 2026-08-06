@@ -16,4 +16,17 @@ Generated provider outputs, caches, local credentials, and large artifacts remai
 
 ## Status
 
-The repository currently contains the proposal baseline, research governance, and the implementation roadmap. The next gated action is Phase 1: inspect the upstream indeterminacy repository to record its SummEval discretization exactly, then create the executable project skeleton and dependency lock.
+WP1 pins the upstream indeterminacy commit and records the verified SummEval
+discretization and polarity specification curve. WP2 provides the Python
+project, locked ChaosNLI SNLI/MNLI task contracts, raw-result schema, and
+run-manifest identity contract. No model calls or experiment runs are part of
+WP2.
+
+## Development
+
+Requires Python 3.12 and `uv`.
+
+```powershell
+uv sync --dev
+uv run pytest
+```

@@ -1,0 +1,67 @@
+{
+  "task_id": "chaosnli_mnli",
+  "source_dataset": "ChaosNLI",
+  "source_uri": "https://huggingface.co/datasets/lguerdan/indeterminacy-datasets/blob/37b8d7863430ec3433d6a73da08408b064643b8b/chaosNLI_v1.0/chaosNLI_mnli_m.jsonl",
+  "source_download_uri": "https://huggingface.co/datasets/lguerdan/indeterminacy-datasets/resolve/37b8d7863430ec3433d6a73da08408b064643b8b/chaosNLI_v1.0/chaosNLI_mnli_m.jsonl",
+  "source_revision": "37b8d7863430ec3433d6a73da08408b064643b8b",
+  "source_object_id": "acf6a5a539ee6d1802c3a45e7c2399ab3320e62c",
+  "source_split": "mnli_matched",
+  "sample_size": 150,
+  "sampling_seed": 42,
+  "input_fields": [
+    "context",
+    "statement"
+  ],
+  "options": [
+    {
+      "token": "A",
+      "label": "Entailment",
+      "source_label": "e"
+    },
+    {
+      "token": "B",
+      "label": "Neutral",
+      "source_label": "n"
+    },
+    {
+      "token": "C",
+      "label": "Contradiction",
+      "source_label": "c"
+    }
+  ],
+  "valid_response_sets": [
+    "A",
+    "B",
+    "C",
+    "AB",
+    "AC",
+    "BC",
+    "ABC"
+  ],
+  "analysis_conventions": {
+    "canonical": {
+      "A": "e",
+      "B": "n",
+      "C": "c"
+    }
+  },
+  "ratings_per_item": 100,
+  "license": {
+    "identifier": "CC-BY-NC-4.0",
+    "source_url": "https://github.com/easonnie/ChaosNLI/blob/f358e234ea2797d9298f7b0213bf1308b6d7756b/LICENSE",
+    "source_revision": "f358e234ea2797d9298f7b0213bf1308b6d7756b",
+    "source_blob": "50f2e656c8e006d68fce3c9ddd02d9069072214a",
+    "caveat": "Underlying MNLI terms and attribution requirements also apply."
+  },
+  "data_card": {
+    "source_url": "https://github.com/easonnie/ChaosNLI/blob/f358e234ea2797d9298f7b0213bf1308b6d7756b/README.md",
+    "source_revision": "f358e234ea2797d9298f7b0213bf1308b6d7756b",
+    "source_blob": "967b5a2becf268a18a7d1615ea11bfb5e8423352"
+  },
+  "upstream_reference": {
+    "repository": "https://github.com/lguerdan/indeterminacy",
+    "commit": "efdb3a2792369e2f98b86dd1d25c2f9c477c115a",
+    "path": "config/tasks.py",
+    "blob": "818b0aedb2281323f8440d8e0ddd8cbe0af50163"
+  }
+}
