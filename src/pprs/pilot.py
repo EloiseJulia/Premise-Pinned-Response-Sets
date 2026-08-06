@@ -152,7 +152,10 @@ async def run_pilot(
     cells = build_pilot_cells(records)
     semaphore = asyncio.Semaphore(concurrency)
     provider = LiteLLMProvider(
-        LiteLLMProviderSettings(api_base=api_base)
+        LiteLLMProviderSettings(
+            api_base=api_base,
+            allow_unauthenticated_local=True,
+        )
     )
     collector = Collector(provider, ParquetRecordCache(cache_dir))
 

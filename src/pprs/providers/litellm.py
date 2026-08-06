@@ -20,6 +20,7 @@ class LiteLLMProviderSettings(BaseModel):
 
     api_base: str | None = Field(default=None, min_length=1)
     api_key: SecretStr | None = None
+    allow_unauthenticated_local: bool = False
     temperature_unsupported_models: tuple[str, ...] = ()
 
     @classmethod
@@ -41,6 +42,7 @@ class LiteLLMProviderSettings(BaseModel):
         return cls(
             api_base=api_base,
             api_key=SecretStr(api_key) if api_key else None,
+            allow_unauthenticated_local=api_key is None,
             temperature_unsupported_models=unsupported,
         )
 
@@ -117,6 +119,12 @@ class LiteLLMProvider(Provider):
             call_kwargs["api_base"] = self.settings.api_base.rstrip("/")
         if self.settings.api_key is not None:
             call_kwargs["api_key"] = self.settings.api_key.get_secret_value()
+        elif self.settings.allow_unauthenticated_local:
+            call_kwargs["api_key"] = "local-proxy-no-auth"
+        else:
+            raise ProviderFailure(
+                "api_key is required unless unauthenticated local mode is explicit"
+            )
         secret = (
             self.settings.api_key.get_secret_value()
             if self.settings.api_key is not None

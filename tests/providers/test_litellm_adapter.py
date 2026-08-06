@@ -175,6 +175,79 @@ def test_missing_api_base_fails_before_litellm(
     assert not called
 
 
+def test_explicit_unauthenticated_local_mode_uses_placeholder(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured = {}
+
+    async def fake_completion(**kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(
+                        content='{"choice":"A"}',
+                        refusal=None,
+                    )
+                )
+            ],
+            usage=None,
+        )
+
+    monkeypatch.setattr(litellm, "acompletion", fake_completion)
+    provider = LiteLLMProvider(
+        LiteLLMProviderSettings(
+            api_base="http://127.0.0.1:8313/v1",
+            allow_unauthenticated_local=True,
+        )
+    )
+    request = ProviderRequest(
+        identity=CallIdentity(
+            rendered_prompt="prompt",
+            model_snapshot="snapshot",
+            temperature=0.0,
+            top_p=1.0,
+            seed=42,
+            response_format=ResponseFormat.FORCED_CHOICE_JSON,
+        ),
+        provider="openai",
+    )
+    __import__("asyncio").run(provider.complete(request))
+    assert captured["api_key"] == "local-proxy-no-auth"
+
+
+def test_missing_key_without_explicit_local_mode_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    called = False
+
+    async def fake_completion(**kwargs):
+        nonlocal called
+        called = True
+        return kwargs
+
+    monkeypatch.setattr(litellm, "acompletion", fake_completion)
+    provider = LiteLLMProvider(
+        LiteLLMProviderSettings(
+            api_base="http://127.0.0.1:8313/v1"
+        )
+    )
+    request = ProviderRequest(
+        identity=CallIdentity(
+            rendered_prompt="prompt",
+            model_snapshot="snapshot",
+            temperature=0.0,
+            top_p=1.0,
+            seed=42,
+            response_format=ResponseFormat.FORCED_CHOICE_JSON,
+        ),
+        provider="openai",
+    )
+    with pytest.raises(ProviderFailure, match="unauthenticated local"):
+        __import__("asyncio").run(provider.complete(request))
+    assert not called
+
+
 def test_guardrail_error_is_mapped_to_provider_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -187,7 +260,10 @@ def test_guardrail_error_is_mapped_to_provider_failure(
 
     monkeypatch.setattr(litellm, "acompletion", fake_completion)
     provider = LiteLLMProvider(
-        LiteLLMProviderSettings(api_base="http://127.0.0.1:8313/v1")
+        LiteLLMProviderSettings(
+            api_base="http://127.0.0.1:8313/v1",
+            allow_unauthenticated_local=True,
+        )
     )
     request = ProviderRequest(
         identity=CallIdentity(
@@ -255,7 +331,10 @@ def test_litellm_openai_error_is_mapped(
 
     monkeypatch.setattr(litellm, "acompletion", fake_completion)
     provider = LiteLLMProvider(
-        LiteLLMProviderSettings(api_base="http://127.0.0.1:8313/v1")
+        LiteLLMProviderSettings(
+            api_base="http://127.0.0.1:8313/v1",
+            allow_unauthenticated_local=True,
+        )
     )
     request = ProviderRequest(
         identity=CallIdentity(
