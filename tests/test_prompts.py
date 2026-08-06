@@ -14,6 +14,7 @@ from pprs.prompts import (
     render_pinned_prompt,
     render_placebo_prompt,
     render_response_set_prompt,
+    repaired_disclosure_template_id,
 )
 from pprs.providers.base import ResponseFormat
 
@@ -57,6 +58,17 @@ def nli_item() -> dict[str, str]:
 def test_five_disclosure_candidates_exist() -> None:
     assert len(disclosure_template_ids()) == 5
     assert len(set(disclosure_template_ids())) == 5
+    assert repaired_disclosure_template_id() not in disclosure_template_ids()
+
+
+def test_repaired_disclosure_forbids_fences(framings, nli_item) -> None:
+    rendered = render_disclosure_prompt(
+        framings[TaskId.CHAOSNLI_SNLI],
+        nli_item,
+        repaired_disclosure_template_id(),
+    )
+    assert "first response character must be {" in rendered.text
+    assert "do not use markdown or code fences" in rendered.text.lower()
 
 
 @pytest.mark.parametrize(

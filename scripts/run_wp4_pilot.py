@@ -12,6 +12,7 @@ from pprs.pilot import (
     select_pilot_records,
     write_pilot_summary,
 )
+from pprs.prompts import disclosure_template_ids
 
 
 def _require_committed_pprs_assets() -> None:
@@ -67,6 +68,8 @@ def main() -> None:
         default="wp4-prompt-pilot-20260807",
     )
     parser.add_argument("--concurrency", type=int, default=4)
+    parser.add_argument("--model", action="append")
+    parser.add_argument("--template-id", action="append")
     args = parser.parse_args()
 
     _require_committed_pprs_assets()
@@ -106,6 +109,15 @@ def main() -> None:
             cache_dir=args.cache_dir,
             run_tag=args.run_tag,
             sample_manifest_ids=sample_manifest_ids,
+            models=tuple(args.model) if args.model else (
+                "gpt-5.4",
+                "gemini-3.5-flash",
+            ),
+            template_ids=(
+                tuple(args.template_id)
+                if args.template_id
+                else None
+            ) or disclosure_template_ids(),
             concurrency=args.concurrency,
         )
     )

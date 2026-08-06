@@ -139,6 +139,8 @@ async def run_pilot(
     cache_dir: Path,
     run_tag: str,
     sample_manifest_ids: dict[TaskId, str],
+    models: tuple[str, ...] = PILOT_MODELS,
+    template_ids: tuple[str, ...] = disclosure_template_ids(),
     concurrency: int = 4,
 ) -> tuple[tuple[RawResult, ...], PilotSummary]:
     if concurrency <= 0:
@@ -149,7 +151,11 @@ async def run_pilot(
     records_by_identity = {
         (record.task, record.item_id): record for record in records
     }
-    cells = build_pilot_cells(records)
+    cells = build_pilot_cells(
+        records,
+        models=models,
+        template_ids=template_ids,
+    )
     semaphore = asyncio.Semaphore(concurrency)
     provider = LiteLLMProvider(
         LiteLLMProviderSettings(
@@ -204,8 +210,8 @@ async def run_pilot(
     summary = PilotSummary(
         run_tag=run_tag,
         git_sha=git_sha,
-        models=PILOT_MODELS,
-        template_ids=disclosure_template_ids(),
+        models=models,
+        template_ids=template_ids,
         task_counts=PILOT_TASK_COUNTS,
         sample_manifest_ids=sample_manifest_ids,
         pilot_item_ids={

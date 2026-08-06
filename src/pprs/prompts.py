@@ -89,6 +89,12 @@ _DISCLOSURE_BY_ID = {
     candidate.template_id: candidate
     for candidate in _DISCLOSURE_CANDIDATES
 }
+_DISCLOSURE_BY_ID["premise-disclosure-inventory-v2"] = DisclosureCandidate(
+    "premise-disclosure-inventory-v2",
+    "Identify the unstated scoring premises that must be fixed before this "
+    "item can be rated under the rubric. The first response character must be "
+    "{ and the last must be }. Do not use Markdown or code fences.",
+)
 
 _DISCLOSURE_SHARED = """
 Return only material scoring premises. Do not rate the item. Do not
@@ -121,6 +127,10 @@ _LINE_SEPARATORS = frozenset(
 
 def disclosure_template_ids() -> tuple[str, ...]:
     return tuple(candidate.template_id for candidate in _DISCLOSURE_CANDIDATES)
+
+
+def repaired_disclosure_template_id() -> str:
+    return "premise-disclosure-inventory-v2"
 
 
 def load_task_framings(path: Path) -> dict[TaskId, TaskFraming]:
