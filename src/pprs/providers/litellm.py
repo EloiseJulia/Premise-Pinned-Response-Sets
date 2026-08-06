@@ -116,9 +116,9 @@ class LiteLLMProvider(Provider):
             )
         model = f"{request.provider}/{identity.model_snapshot}"
         max_completion_tokens = {
-            "forced_choice_json_v1": 64,
-            "response_set_json_v1": 128,
-            "premise_disclosure_json_v1": 2048,
+            "forced_choice_json_v1": 1024,
+            "response_set_json_v1": 1024,
+            "premise_disclosure_json_v1": 8192,
         }[identity.response_format.value]
         call_kwargs: dict[str, Any] = {}
         if self.settings.api_base is not None:

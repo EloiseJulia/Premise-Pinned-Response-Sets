@@ -13,17 +13,17 @@ def main() -> None:
     parser.add_argument(
         "--summary",
         type=Path,
-        default=Path("artifacts/wp6-smoke/summary.json"),
+        default=Path("artifacts/wp6-smoke-v2/summary.json"),
     )
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path("artifacts/wp6-smoke/cache"),
+        default=Path("artifacts/wp6-smoke-v2/cache"),
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("artifacts/wp6-smoke/review-20.json"),
+        default=Path("artifacts/wp6-smoke-v2/review-20.json"),
     )
     args = parser.parse_args()
     payload = asyncio.run(build_review(args.summary, args.cache_dir))

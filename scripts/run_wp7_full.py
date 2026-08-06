@@ -31,28 +31,28 @@ def main() -> None:
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path("artifacts/wp7-full/cache"),
+        default=Path("artifacts/wp7-full-v2/cache"),
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("artifacts/wp7-full/summary.json"),
+        default=Path("artifacts/wp7-full-v2/summary.json"),
     )
     parser.add_argument("--concurrency", type=int, default=16)
     args = parser.parse_args()
     git_sha = validate_freeze(
-        freeze_path=Path("configs/runs/confirmatory-v1.freeze.json"),
-        expected_tag="pprs-prereg-v1",
+        freeze_path=Path("configs/runs/confirmatory-v2.freeze.json"),
+        expected_tag="pprs-prereg-v2",
     )
     validate_smoke_gate(
-        summary_path=Path("artifacts/wp6-smoke/summary.json"),
-        review_path=Path("artifacts/wp6-smoke/review-20.json"),
+        summary_path=Path("artifacts/wp6-smoke-v2/summary.json"),
+        review_path=Path("artifacts/wp6-smoke-v2/review-20.json"),
         approval_path=Path(
-            "artifacts/wp6-smoke/review-approval.json"
+            "artifacts/wp6-smoke-v2/review-approval.json"
         ),
         expected_git_sha=git_sha,
         run_manifest_path=Path(
-            "artifacts/wp6-smoke/run-manifest.json"
+            "artifacts/wp6-smoke-v2/run-manifest.json"
         ),
     )
     sample_paths = {
@@ -79,7 +79,7 @@ def main() -> None:
             api_base=args.api_base,
             expected_models_roster_hash=ROSTER_HASH,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v1",
+            prereg_tag="pprs-prereg-v2",
             subset_id="confirmatory-v1",
             records=records,
             models=(
@@ -90,7 +90,7 @@ def main() -> None:
             ),
             temperatures=(0.0, 0.7),
             cache_dir=args.cache_dir,
-            run_tag="wp7-full-v1",
+            run_tag="wp7-full-v2",
             concurrency=args.concurrency,
         )
     )
@@ -108,11 +108,11 @@ def main() -> None:
             api_base=args.api_base,
             expected_models_roster_hash=ROSTER_HASH,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v1",
+            prereg_tag="pprs-prereg-v2",
             disclosure_results=disclosures,
             records=grid_records,
             cache_dir=args.cache_dir,
-            run_tag="wp7-full-grid-v1",
+            run_tag="wp7-full-grid-v2",
             expected_fingerprints=primary.system_fingerprints,
             concurrency=args.concurrency,
         )
@@ -138,7 +138,7 @@ def main() -> None:
         ),
         run_tag=primary.run_tag,
         git_sha=git_sha,
-        prereg_tag="pprs-prereg-v1",
+        prereg_tag="pprs-prereg-v2",
         output_files={
             "summary": args.output,
             "raw_inventory": raw_inventory_path,

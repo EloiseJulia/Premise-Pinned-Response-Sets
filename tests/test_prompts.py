@@ -295,7 +295,7 @@ def test_full_grid_prompt_contains_each_assignment(
             ("How is time read?", "broadly"),
         ),
     )
-    assert rendered.template_id == "premise-full-grid-v1"
+    assert rendered.template_id == "premise-full-grid-v2"
     assert rendered.text.count("Premise:") == 2
 
 

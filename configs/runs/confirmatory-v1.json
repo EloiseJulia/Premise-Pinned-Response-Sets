@@ -1,5 +1,6 @@
 {
-  "config_id": "confirmatory-v1",
+  "config_id": "confirmatory-v1-amendment-1",
+  "prereg_tag": "pprs-prereg-v2",
   "base_seed": 42,
   "seed_policy": "sha256(namespace + canonical experiment coordinates + base_seed) modulo 2^31",
   "tasks": {
@@ -77,9 +78,9 @@
   "top_p": 1.0,
   "response_format": "strict_json",
   "generation_controls": {
-    "forced_choice_max_completion_tokens": 64,
-    "response_set_max_completion_tokens": 128,
-    "premise_disclosure_max_completion_tokens": 2048,
+    "forced_choice_max_completion_tokens": 1024,
+    "response_set_max_completion_tokens": 1024,
+    "premise_disclosure_max_completion_tokens": 8192,
     "request_timeout_seconds": 120,
     "provider_retries": 0
   },

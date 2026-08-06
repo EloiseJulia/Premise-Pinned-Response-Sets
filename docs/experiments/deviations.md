@@ -51,3 +51,21 @@ Record a deviation before changing any locked proposal value. Each entry must in
   smoke/full progression in the overnight GO.
 - **Implementation:** `configs/runs/confirmatory-v1.json`,
   `docs/research/model-snapshots.md`, and per-call `system_fingerprint`.
+
+## 2026-08-07: Preregistration amendment after failed smoke
+
+- **Affected lock:** Generation max-completion budgets and F/S/pin/placebo/full-
+  grid prompt template IDs.
+- **Observed failure:** Frozen v1 smoke parse success was 62.7%. All 1,094
+  malformed responses came from `gemini-3.5-flash`; raw text showed empty or
+  truncated JSON under 64/128/2048 completion budgets. Full run did not start.
+- **Decision:** Increase budgets to 1024 for forced/response-set/pinned/placebo
+  calls and 8192 for disclosure. Add explicit no-fence/first-and-last-character
+  JSON instructions under new v2 template IDs.
+- **Alternatives considered:** loosen the parser to strip fences; drop Gemini;
+  impute failures; continue despite the smoke gate. All are rejected.
+- **Expected impact:** Lower truncation/format failure. Prompt semantics and
+  research constructs are unchanged.
+- **Approval:** Owner's GO authorized repair and rerun after smoke failures.
+- **Implementation:** preregistration amendment tag `pprs-prereg-v2`; v1 tag and
+  raw failures remain immutable.

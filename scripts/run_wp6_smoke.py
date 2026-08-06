@@ -23,20 +23,20 @@ def main() -> None:
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path("artifacts/wp6-smoke/cache"),
+        default=Path("artifacts/wp6-smoke-v2/cache"),
     )
     parser.add_argument(
         "--summary",
         type=Path,
-        default=Path("artifacts/wp6-smoke/summary.json"),
+        default=Path("artifacts/wp6-smoke-v2/summary.json"),
     )
     parser.add_argument("--concurrency", type=int, default=8)
     args = parser.parse_args()
     git_sha = validate_freeze(
         freeze_path=Path(
-            "configs/runs/confirmatory-v1.freeze.json"
+            "configs/runs/confirmatory-v2.freeze.json"
         ),
-        expected_tag="pprs-prereg-v1",
+        expected_tag="pprs-prereg-v2",
     )
     subset_id, records = load_subset_records(
         Path("configs/samples/smoke-v1.json")
@@ -45,13 +45,13 @@ def main() -> None:
         run_study_subset(
             api_base=args.api_base,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v1",
+            prereg_tag="pprs-prereg-v2",
             subset_id=subset_id,
             records=records,
             models=("gpt-5.4", "gemini-3.5-flash"),
             temperatures=(0.0, 0.7),
             cache_dir=args.cache_dir,
-            run_tag="wp6-smoke-v1",
+            run_tag="wp6-smoke-v2",
             expected_models_roster_hash=(
                 "0f17e867c0fd3d36c30232982bd4e43a30d31bbb1dd65d64d72ad38839513ac0"
             ),
@@ -72,13 +72,13 @@ def main() -> None:
         run_study_subset(
             api_base=args.api_base,
             git_sha=git_sha,
-            prereg_tag="pprs-prereg-v1",
+            prereg_tag="pprs-prereg-v2",
             subset_id=subset_id,
             records=records,
             models=("gpt-5.4", "gemini-3.5-flash"),
             temperatures=(0.0, 0.7),
             cache_dir=args.cache_dir,
-            run_tag="wp6-smoke-v1",
+            run_tag="wp6-smoke-v2",
             expected_models_roster_hash=(
                 "0f17e867c0fd3d36c30232982bd4e43a30d31bbb1dd65d64d72ad38839513ac0"
             ),
@@ -124,7 +124,7 @@ def main() -> None:
         ),
         run_tag=first_summary.run_tag,
         git_sha=git_sha,
-        prereg_tag="pprs-prereg-v1",
+        prereg_tag="pprs-prereg-v2",
         output_files={
             "summary": args.summary,
             "review": review_path,

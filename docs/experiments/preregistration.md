@@ -1,8 +1,7 @@
 # PPRS Confirmatory Preregistration
 
 **Config:** `configs/runs/confirmatory-v1.json`
-**Status:** Ready for independent freeze audit, freeze manifest, freeze commit,
-and preregistration tag.
+**Status:** Amendment 1 ready for freeze as `pprs-prereg-v2`.
 
 ## Research Questions
 
@@ -196,12 +195,30 @@ is null. This is an ablation, not a confirmatory hypothesis.
 
 ## Generation Controls
 
-- forced-choice/pinned/placebo max completion tokens: 64;
-- response-set max completion tokens: 128;
-- premise-disclosure max completion tokens: 2048;
+- forced-choice/pinned/placebo max completion tokens: 1024;
+- response-set max completion tokens: 1024;
+- premise-disclosure max completion tokens: 8192;
 - request timeout: 120 seconds;
 - provider retry count: 0 (each failure remains an explicit record);
 - no fallback model or success-shaped retry.
+
+## Amendment 1: Smoke generation budget repair
+
+The frozen v1 smoke failed at 62.7% parse success. `gpt-5.4` parsed normally;
+`gemini-3.5-flash` produced 1,094 malformed responses, overwhelmingly
+empty/truncated completions under the v1 token budgets. Six provider errors were
+also explicit. No confirmatory full run began.
+
+Amendment 1 changes only generation budgets and the JSON-format suffix:
+
+- new IDs `forced-choice-v2`, `response-set-v2`, `premise-pinned-v2`,
+  `placebo-pinned-v2`, `premise-full-grid-v2`;
+- require first character `{`, last character `}`, and no Markdown fences;
+- increase completion budgets to 1024/1024/8192 as listed above.
+
+All datasets, models, temperatures, repetitions, estimators, thresholds,
+subsets, hypotheses, and reporting rules remain unchanged. The v1 smoke cache
+is retained under `artifacts/wp6-smoke/`.
 
 ## Smoke Gate
 

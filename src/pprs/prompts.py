@@ -278,7 +278,11 @@ def _render_rating_prompt(
             f"Evaluation criterion:\n{framing.criterion}",
             f"Item:\n{_item_text(framing, item)}",
             f"{instruction}\n{_option_text(permuted)}",
-            f"Return only JSON: {response_example}",
+            (
+                f"Return only JSON: {response_example}\n"
+                "The first response character must be { and the last must be }."
+                " Do not use Markdown or code fences."
+            ),
         ]
     )
     text = "\n\n".join(blocks)
@@ -308,7 +312,7 @@ def render_forced_choice_prompt(
         item,
         options,
         seed,
-        template_id="forced-choice-v1",
+        template_id="forced-choice-v2",
         instruction="Select exactly one option that best applies:",
         response_example='{"choice":"<token>"}',
     )
@@ -325,7 +329,7 @@ def render_response_set_prompt(
         item,
         options,
         seed,
-        template_id="response-set-v1",
+        template_id="response-set-v2",
         instruction=(
             "Select every option that could reasonably apply under plausible "
             "interpretations of the criterion:"
@@ -354,7 +358,7 @@ def render_pinned_prompt(
         item,
         options,
         seed,
-        template_id="premise-pinned-v1",
+        template_id="premise-pinned-v2",
         instruction="Select exactly one option that best applies:",
         response_example='{"choice":"<token>"}',
         prefix=prefix,
@@ -387,7 +391,7 @@ def render_full_grid_prompt(
         item,
         options,
         seed,
-        template_id="premise-full-grid-v1",
+        template_id="premise-full-grid-v2",
         instruction="Select exactly one option that best applies:",
         response_example='{"choice":"<token>"}',
         prefix=prefix,
@@ -430,7 +434,7 @@ def render_placebo_prompt(
         item,
         options,
         seed,
-        template_id="placebo-pinned-v1",
+        template_id="placebo-pinned-v2",
         instruction="Select exactly one option that best applies:",
         response_example='{"choice":"<token>"}',
         prefix=prefix,

@@ -857,7 +857,7 @@ def _validate_coordinate_grid(
             raise ValueError("raw result contains an unlocked model")
         if result.temperature not in temperatures or result.top_p != 1.0:
             raise ValueError("raw result contains unlocked sampling parameters")
-        if result.prereg_tag != "pprs-prereg-v1":
+        if result.prereg_tag != config["prereg_tag"]:
             raise ValueError("raw result lacks the frozen preregistration tag")
         if (result.task, result.item_id) not in item_ids:
             raise ValueError("raw result item is outside frozen samples")

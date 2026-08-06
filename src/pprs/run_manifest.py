@@ -177,6 +177,7 @@ def validate_raw_run_manifest(
     expected_git_sha: str,
     trusted_manifest_sha256: str | None = None,
     trusted_manifest_id: str | None = None,
+    expected_prereg_tag: str = "pprs-prereg-v2",
 ) -> RunManifest:
     if (
         trusted_manifest_sha256 is not None
@@ -194,7 +195,7 @@ def validate_raw_run_manifest(
         raise ValueError("raw run manifest ID does not match")
     if manifest.git_sha != expected_git_sha:
         raise ValueError("raw run manifest Git SHA differs from freeze")
-    if manifest.prereg_tag != "pprs-prereg-v1":
+    if manifest.prereg_tag != expected_prereg_tag:
         raise ValueError("raw run manifest preregistration tag differs")
     for key, location in manifest.output_locations.items():
         output_path = Path(location)
