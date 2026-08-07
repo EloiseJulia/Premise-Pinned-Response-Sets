@@ -88,6 +88,8 @@ def main() -> None:
             "figure_3": root / "figures/figure-3-regret.png",
             "regret_surface": root / "figures/regret-surface.csv",
             "high_risk": root / "figures/high-risk-items.json",
+            "technical_brief": Path("docs/brief/technical-brief.md"),
+            "email_draft": Path("docs/brief/email-draft.md"),
         },
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
