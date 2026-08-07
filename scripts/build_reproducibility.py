@@ -17,6 +17,11 @@ def main() -> None:
         default=Path("artifacts/wp7-full-v3"),
     )
     parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=Path("data/processed"),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("artifacts/wp8/reproducibility-manifest.json"),
@@ -49,14 +54,14 @@ def main() -> None:
             "specification_curve": (
                 root / "specification-curve-manifest.json"
             ),
-            "snli_parquet": Path(
-                "data/processed/chaosnli-snli.parquet"
+            "snli_parquet": (
+                args.data_root / "chaosnli-snli.parquet"
             ),
-            "mnli_parquet": Path(
-                "data/processed/chaosnli-mnli.parquet"
+            "mnli_parquet": (
+                args.data_root / "chaosnli-mnli.parquet"
             ),
-            "summeval_parquet": Path(
-                "data/processed/summeval-relevance.parquet"
+            "summeval_parquet": (
+                args.data_root / "summeval-relevance.parquet"
             ),
             "analysis_upstream": (
                 root / "analysis-upstream_behavior.json"
@@ -69,6 +74,10 @@ def main() -> None:
             ),
             "manifest_semantic": (
                 root / "manifest-semantic_aligned.json"
+            ),
+            "audit_supplement": root / "audit-supplement.json",
+            "post_analysis_manifest": (
+                root / "post-analysis-manifest.json"
             ),
         },
         outputs={

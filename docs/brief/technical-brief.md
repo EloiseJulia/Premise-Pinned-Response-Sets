@@ -17,13 +17,27 @@ rating distributions?
 
 ## Results
 
-Pending completion of the frozen full run. Insert:
+The frozen run produced 365,543 raw records; 350,505 parsed successfully and all
+failures remain explicit.
 
-1. beta_self versus beta_pin figure and correlation;
-2. seed/context entropy figure and dangerous-mass estimate;
-3. judge-selection regret figure and complete threshold-surface summary.
+1. **H1 was not supported.** `beta_self` and `beta_pin` had Pearson
+   `r=0.439`, 95% bootstrap CI `[0.306, 0.871]`, above the predicted 0.4
+   threshold. This is evidence that direct self-report and premise pinning share
+   more structure than predicted, though the interval is wide.
+2. **H2 was strongly supported.** The dangerous quadrant contained 80.69% of
+   valid temperature-0.7 item-judge cells, 95% CI `[78.72%, 82.63%]`. Mean
+   real-pin context entropy was 0.922 bits versus 0.190 for matched placebo.
+3. **H3 was mixed and therefore not supported overall.** Median
+   `MSE_self-MSE_pin` was −0.327 for SNLI, +0.104 for MNLI, +0.595 for
+   SummEval under the upstream polarity, and +0.254 under the semantic polarity.
+   PPRS helped on MNLI/SummEval but hurt on SNLI, violating the preregistered
+   all-positive monotonic prediction.
 
-Regardless of direction, the completed brief will report:
+The matched real-minus-placebo flip contrast was +0.2265, 95% CI
+`[0.2160, 0.2368]`. Full-grid interactions were small: mean entropy difference
+approximately +0.0024 bits and mean PPRS Jaccard approximately 0.955.
+
+The report includes:
 
 - H1 correlation and confidence interval, including high-correlation evidence
   favorable to the upstream self-report construct;

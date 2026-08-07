@@ -9,11 +9,17 @@ unstated scoring premises and then rerun the rating under one counterfactually
 pinned premise value at a time.
 
 [Insert Figure 1.] In the frozen three-task/four-judge panel,
-`beta_self` and `beta_pin` [insert result and interval].
+`beta_self` and `beta_pin` correlated at `r=0.439` (95% bootstrap CI
+`[0.306, 0.871]`), so my preregistered weak-correlation prediction was not
+supported.
 
-[Insert one-sentence H2/H3 result.] The complete `pi`/`tau` surfaces, placebo,
-prompt-leakage audit, and both SummEval polarity conventions are included in the
-linked brief rather than selecting a favorable threshold.
+The premise intervention nevertheless exposed a large stable-sampling blind
+spot: 80.69% of valid item-judge cells had `H_seed <= 0.5` but `H_ctx > 0`
+(95% CI `[78.72%, 82.63%]`), with real-pin entropy 0.922 bits versus 0.190 for
+matched placebo. Distribution matching was mixed: PPRS improved MNLI and
+SummEval but worsened SNLI, so H3 failed overall. The complete `pi`/`tau`
+surfaces and both SummEval polarity conventions are included rather than
+selecting a favorable specification.
 
 The boundaries are important: the task panel is small; SummEval has only eight
 human ratings per item versus one hundred for ChaosNLI; model-disclosed premises
