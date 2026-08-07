@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from pprs.data.schema import TaskId
 from pprs.study import (
     load_subset_records,
@@ -10,6 +12,8 @@ from pprs.records.schema import PinAssignment, PremiseType
 
 
 def test_smoke_subset_loads_locked_ten_items() -> None:
+    if not Path("data/processed/chaosnli-snli.parquet").exists():
+        pytest.skip("requires locally materialized ignored sample Parquet")
     subset_id, records = load_subset_records(
         Path("configs/samples/smoke-v1.json")
     )

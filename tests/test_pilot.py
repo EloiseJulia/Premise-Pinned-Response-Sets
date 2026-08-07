@@ -78,6 +78,8 @@ def test_pilot_grid_is_20_by_2_by_5() -> None:
 
 
 def test_sample_manifest_validation_rejects_wrong_order() -> None:
+    if not Path("data/processed/chaosnli-snli.parquet").exists():
+        pytest.skip("requires locally materialized ignored sample Parquet")
     # The full round-trip is exercised by the committed real sample artifacts.
     # A copied manifest paired with the wrong task Parquet must fail.
     with pytest.raises(ValueError):

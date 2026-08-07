@@ -11,6 +11,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "filelock>=3.20,<4",
     "litellm>=1.77,<2",
+    "matplotlib>=3.10,<4",
     "pandas>=2.3,<3",
     "pydantic>=2.11,<3",
     "pyarrow>=21,<22",
