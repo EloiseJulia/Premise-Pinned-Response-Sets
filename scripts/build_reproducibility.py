@@ -90,6 +90,9 @@ def main() -> None:
             "high_risk": root / "figures/high-risk-items.json",
             "technical_brief": Path("docs/brief/technical-brief.md"),
             "email_draft": Path("docs/brief/email-draft.md"),
+            "experiment_notes_zh": Path(
+                "docs/brief/pprs-experiment-notes-zh.md"
+            ),
         },
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
