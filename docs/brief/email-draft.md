@@ -25,8 +25,8 @@ The boundaries are important: the task panel is small; SummEval has only eight
 human ratings per item versus one hundred for ChaosNLI; model-disclosed premises
 have not been validated as the same construct as human reasoning; and the
 commercial service IDs limit exact numeric reproducibility. I therefore view
-this as evidence that the failure mode [exists/was not detected] in this frozen
-panel, not an estimate of deployment prevalence.
+this as evidence that the failure mode exists in this frozen panel, not an
+estimate of deployment prevalence.
 
 Repository: [link]  
 Four-page technical brief: [link]
