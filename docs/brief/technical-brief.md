@@ -41,7 +41,8 @@ The report includes:
 
 - H1 correlation and confidence interval, including high-correlation evidence
   favorable to the upstream self-report construct;
-- H2 dangerous mass, including a null or sub-15% estimate;
+- H2 dangerous mass and bootstrap interval, including its very large observed
+  magnitude and the limits on generalizing it beyond the frozen panel;
 - H3 task/polarity/`pi` surfaces, including adverse PPRS results;
 - placebo contrasts even when they weaken the premise-sensitivity claim;
 - all 90 leakage-audit outcomes and rationale-quality caveat;

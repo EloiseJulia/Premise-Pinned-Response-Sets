@@ -8,7 +8,7 @@ a judge to directly self-report every reasonable rating, I ask it to surface
 unstated scoring premises and then rerun the rating under one counterfactually
 pinned premise value at a time.
 
-[Insert Figure 1.] In the frozen three-task/four-judge panel,
+The attached Figure 1 shows that, in the frozen three-task/four-judge panel,
 `beta_self` and `beta_pin` correlated at `r=0.439` (95% bootstrap CI
 `[0.306, 0.871]`), so my preregistered weak-correlation prediction was not
 supported.
@@ -28,8 +28,8 @@ commercial service IDs limit exact numeric reproducibility. I therefore view
 this as evidence that the failure mode exists in this frozen panel, not an
 estimate of deployment prevalence.
 
-Repository: [link]  
-Four-page technical brief: [link]
+Repository: https://github.com/EloiseJulia/Premise-Pinned-Response-Sets  
+Technical brief: `docs/brief/technical-brief.md` in the repository
 
 Best,
 Eloise Julia
